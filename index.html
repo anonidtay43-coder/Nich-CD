@@ -1,2 +1,594 @@
-# Nich-CD
- Construction
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เครื่องมือลากวาดผังบ้านเอง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F1E6; --paper-line:#e6ddc8;
+    --ink:#2B3A42; --ink-soft:#5B6B72;
+    --accent:#D6349B; --accent-soft:#f3d9ea;
+    --card:#ffffff;
+    --shadow: 0 1px 2px rgba(43,58,66,0.06), 0 8px 24px rgba(43,58,66,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Sarabun', sans-serif; color:var(--ink);
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0/28px 100%,
+      var(--paper);
+    min-height:100vh;
+  }
+  header{padding:24px 32px 12px;}
+  header .eyebrow{font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600;}
+  header h1{margin:6px 0 4px; font-size:clamp(20px,3vw,27px); font-weight:700;}
+  header p{margin:0; color:var(--ink-soft); font-size:14px; max-width:680px;}
+
+  .app{display:grid; grid-template-columns: 300px 1fr; gap:22px; padding:8px 32px 40px; align-items:start;}
+  @media (max-width: 900px){ .app{grid-template-columns: 1fr;} }
+
+  .panel{background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:18px;}
+  .panel h2{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin:0 0 12px; font-weight:600;}
+  .field{margin-bottom:14px;}
+  .field label{display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom:5px;}
+  .field label .val{font-family:'JetBrains Mono', monospace; color:var(--accent); font-weight:600;}
+  input[type=range]{width:100%; accent-color:var(--accent);}
+  .row2{display:flex; gap:10px;}
+  .row2 .field{flex:1;}
+  .divider{height:1px; background:var(--paper-line); margin:14px 0;}
+
+  .tool-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .tool-btn{
+    display:flex; align-items:center; gap:6px;
+    padding:8px 8px; border-radius:8px; border:1px solid var(--paper-line);
+    background:var(--paper); cursor:pointer; font-size:12.5px; font-weight:500; color:var(--ink);
+    font-family:'Sarabun', sans-serif;
+  }
+  .tool-btn svg{flex:none;}
+  .tool-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .tool-btn.wide{grid-column:1/3;}
+
+  .props{background:var(--paper); border-radius:10px; padding:14px; font-size:13.5px;}
+  .props .empty{color:var(--ink-soft); font-size:13px; line-height:1.6;}
+  .props input[type=text]{
+    width:100%; font-family:'Sarabun',sans-serif; border:1px solid var(--paper-line);
+    border-radius:6px; padding:6px 8px; font-size:13.5px; margin-top:4px;
+  }
+  .props select{
+    width:100%; border:1px solid var(--paper-line); border-radius:6px; padding:6px 8px;
+    font-family:'Sarabun',sans-serif; font-size:13.5px; margin-top:4px; background:#fff;
+  }
+  .props .btn-row{display:flex; gap:8px; margin-top:12px;}
+  .props button{
+    flex:1; border:none; border-radius:8px; padding:8px 10px; font-weight:600; font-size:13px; cursor:pointer;
+    font-family:'Sarabun',sans-serif;
+  }
+  .btn-rotate{background:#fff; border:1px solid var(--paper-line) !important; color:var(--ink);}
+  .btn-delete{background:#c1435c; color:#fff;}
+
+  .preview{background:var(--card); border-radius:14px; box-shadow:var(--shadow); overflow:hidden;}
+  .preview-head{display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--paper-line); gap:12px; flex-wrap:wrap;}
+  .tabs{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .tab{padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);}
+  .tab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .tab-icon-btn{width:26px; height:26px; border-radius:50%; border:1px dashed var(--paper-line); background:#fff; cursor:pointer; font-size:14px; color:var(--ink-soft); line-height:1;}
+  .canvas-wrap{padding:18px; display:flex; justify-content:center; align-items:center; min-height:460px; touch-action:none;}
+  .canvas-wrap svg{max-width:100%; height:auto; cursor:crosshair; user-select:none;}
+  .foot-actions{display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-top:1px solid var(--paper-line); font-size:12.5px; color:var(--ink-soft); gap:12px; flex-wrap:wrap;}
+  .download-btn{background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-family:'Sarabun',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;}
+  .clear-btn{background:transparent; border:1px solid var(--paper-line); color:var(--ink-soft); padding:8px 14px; border-radius:8px; font-family:'Sarabun',sans-serif; font-weight:600; font-size:13px; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Freehand Plan Editor</div>
+  <h1>ลากวาดผังบ้านเอง</h1>
+  <p>เลือกเครื่องมือ แล้วลากวาดห้อง หรือคลิกเพื่อวางประตู หน้าต่าง แอร์ และเฟอร์นิเจอร์ตามตำแหน่งที่ต้องการ คลิกวัตถุใดๆ เพื่อย้าย/แก้ไข/ลบได้ตลอดเวลา</p>
+</header>
+
+<div class="app">
+  <div class="panel">
+    <h2>ขนาดที่ดิน/ตัวบ้าน</h2>
+    <div class="row2">
+      <div class="field"><label>กว้าง (ม.) <span class="val" id="widthVal">8.0</span></label><input type="range" id="width" min="5" max="20" step="0.5" value="8"></div>
+      <div class="field"><label>ลึก (ม.) <span class="val" id="depthVal">9.5</span></label><input type="range" id="depth" min="5" max="20" step="0.5" value="9.5"></div>
+    </div>
+    <div class="divider"></div>
+
+    <h2>เครื่องมือ</h2>
+    <div class="tool-grid" id="toolGrid"></div>
+    <div class="divider"></div>
+
+    <h2>คุณสมบัติที่เลือก</h2>
+    <div class="props" id="props"><div class="empty">ยังไม่ได้เลือกวัตถุ — คลิกเครื่องมือด้านบนแล้วลาก/คลิกบนผังเพื่อวาง</div></div>
+  </div>
+
+  <div class="preview">
+    <div class="preview-head">
+      <div class="tabs" id="floorTabs"></div>
+      <button class="clear-btn" id="clearFloorBtn">ล้างชั้นนี้</button>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap"></div>
+    <div class="foot-actions">
+      <span>กริดล็อก 0.25 ม. · คลิก Delete บนคีย์บอร์ดเพื่อลบวัตถุที่เลือก</span>
+      <button class="download-btn" id="downloadBtn">บันทึกภาพ PNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCALE = 46;
+const GRID = 0.25;
+const MARGIN = { top: 40, right: 40, bottom: 40, left: 40 };
+let uid = 1;
+
+const state = { width: 8, depth: 9.5, activeFloor: 0 };
+let floorsData = [ { objects: [] } ];
+
+let currentTool = 'select';
+let currentFurniture = null;
+let selectedId = null;
+
+let movingId = null, dragOffset = null;
+let resizing = null; // { anchor:{x,y} }
+let drawingRoom = null; // { startX, startY }
+let previewRoom = null;
+
+const ROOM_TYPES = [
+  { key:'bedroom', label:'ห้องนอน', color:'#F4EADA' },
+  { key:'bathroom', label:'ห้องน้ำ', color:'#E2EDF4' },
+  { key:'kitchen', label:'ห้องครัว', color:'#E6EFE8' },
+  { key:'living', label:'ห้องรับแขก', color:'#ECE6F4' },
+  { key:'office', label:'ห้องทำงาน', color:'#FBEAE0' },
+  { key:'balcony', label:'ระเบียง', color:'#E8F3E3' },
+  { key:'garage', label:'ที่จอดรถ', color:'#EDEDED' },
+  { key:'other', label:'พื้นที่อื่นๆ', color:'#F0EFEC' },
+];
+const ROOM_COLOR = {}; const ROOM_LABEL = {};
+ROOM_TYPES.forEach(t => { ROOM_COLOR[t.key]=t.color; ROOM_LABEL[t.key]=t.label; });
+
+const FURNITURE_TYPES = [
+  { key:'bed', label:'เตียง', w:1.6, h:2.0 },
+  { key:'sofa', label:'โซฟา', w:1.8, h:0.85 },
+  { key:'table', label:'โต๊ะอาหาร', w:1.2, h:0.8 },
+  { key:'wardrobe', label:'ตู้เสื้อผ้า', w:1.2, h:0.6 },
+  { key:'toilet', label:'โถส้วม', w:0.45, h:0.65 },
+  { key:'sink', label:'อ่างล้างหน้า', w:0.55, h:0.45 },
+  { key:'stove', label:'เตา', w:0.6, h:0.6 },
+  { key:'tv', label:'ทีวี', w:1.1, h:0.35 },
+];
+const FURN_DEF = {}; FURNITURE_TYPES.forEach(f => FURN_DEF[f.key]=f);
+
+const DEFAULT_SIZE = {
+  door: { w:0.9, h:0.2 }, window: { w:1.2, h:0.15 }, aircon: { w:0.8, h:0.25 },
+};
+
+const els = {
+  width: document.getElementById('width'), depth: document.getElementById('depth'),
+  widthVal: document.getElementById('widthVal'), depthVal: document.getElementById('depthVal'),
+  toolGrid: document.getElementById('toolGrid'), props: document.getElementById('props'),
+  floorTabs: document.getElementById('floorTabs'), canvasWrap: document.getElementById('canvasWrap'),
+};
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+function snap(v){ return Math.round(v/GRID)*GRID; }
+function curFloor(){ return floorsData[state.activeFloor]; }
+function findObj(id){ return curFloor().objects.find(o=>o.id===id) || null; }
+
+// ---------------- Toolbar ----------------
+function iconSquare(color){ return `<svg width="16" height="16"><rect x="1" y="1" width="14" height="14" rx="2" fill="${color}" stroke="#2B3A42" stroke-width="1.4"/></svg>`; }
+function iconLine(){ return `<svg width="16" height="16"><line x1="2" y1="8" x2="14" y2="8" stroke="#2B3A42" stroke-width="2.5"/></svg>`; }
+function iconWin(){ return `<svg width="16" height="16"><rect x="1" y="6" width="14" height="4" fill="#BFDCE8" stroke="#2B3A42" stroke-width="1.2"/></svg>`; }
+function iconAc(){ return `<svg width="16" height="16"><rect x="1" y="4" width="14" height="6" rx="1.5" fill="#dfe8ea" stroke="#2B3A42" stroke-width="1.2"/></svg>`; }
+function iconSelect(){ return `<svg width="16" height="16"><path d="M3 2 L13 8 L8.5 9 L11 13.5 L9 14.5 L6.5 10 L3 13 Z" fill="#2B3A42"/></svg>`; }
+
+function buildToolbar(){
+  const tools = [
+    { id:'select', label:'เลือก/ย้าย', icon: iconSelect() },
+    { id:'room', label:'วาดห้อง', icon: iconSquare('#F4EADA'), wide:true },
+    { id:'door', label:'ประตู', icon: iconLine() },
+    { id:'window', label:'หน้าต่าง', icon: iconWin() },
+    { id:'aircon', label:'แอร์', icon: iconAc(), wide:true },
+  ];
+  els.toolGrid.innerHTML = '';
+  tools.forEach(t => {
+    const b = document.createElement('div');
+    b.className = 'tool-btn' + (t.wide?' wide':'') + (currentTool===t.id ? ' active':'');
+    b.innerHTML = `${t.icon}<span>${t.label}</span>`;
+    b.onclick = () => { currentTool = t.id; currentFurniture=null; buildToolbar(); };
+    els.toolGrid.appendChild(b);
+  });
+  FURNITURE_TYPES.forEach(f => {
+    const b = document.createElement('div');
+    b.className = 'tool-btn' + (currentTool==='furniture' && currentFurniture===f.key ? ' active':'');
+    b.innerHTML = `${iconSquare('#e4ddcf')}<span>${f.label}</span>`;
+    b.onclick = () => { currentTool='furniture'; currentFurniture=f.key; buildToolbar(); };
+    els.toolGrid.appendChild(b);
+  });
+}
+
+// ---------------- Floor tabs ----------------
+function buildFloorTabs(){
+  els.floorTabs.innerHTML = '';
+  floorsData.forEach((f,i) => {
+    const b = document.createElement('div');
+    b.className = 'tab' + (i===state.activeFloor?' active':'');
+    b.textContent = `ชั้น ${i+1}`;
+    b.onclick = () => { state.activeFloor = i; selectedId=null; renderProps(); renderCanvas(); };
+    els.floorTabs.appendChild(b);
+  });
+  const add = document.createElement('div');
+  add.className = 'tab-icon-btn'; add.textContent = '+';
+  add.title = 'เพิ่มชั้น';
+  add.onclick = () => { if(floorsData.length<4){ floorsData.push({objects:[]}); state.activeFloor=floorsData.length-1; buildFloorTabs(); renderCanvas(); } };
+  els.floorTabs.appendChild(add);
+  if (floorsData.length>1){
+    const rm = document.createElement('div');
+    rm.className = 'tab-icon-btn'; rm.textContent = '−';
+    rm.title = 'ลบชั้นสุดท้าย';
+    rm.onclick = () => { floorsData.pop(); state.activeFloor = clamp(state.activeFloor,0,floorsData.length-1); selectedId=null; buildFloorTabs(); renderProps(); renderCanvas(); };
+    els.floorTabs.appendChild(rm);
+  }
+}
+
+// ---------------- Properties panel ----------------
+function renderProps(){
+  const o = selectedId ? findObj(selectedId) : null;
+  if (!o){
+    els.props.innerHTML = '<div class="empty">ยังไม่ได้เลือกวัตถุ — คลิกเครื่องมือด้านบนแล้วลาก/คลิกบนผังเพื่อวาง</div>';
+    return;
+  }
+  if (o.kind === 'room'){
+    const opts = ROOM_TYPES.map(t => `<option value="${t.key}" ${t.key===o.type?'selected':''}>${t.label}</option>`).join('');
+    els.props.innerHTML = `
+      <label style="font-size:12.5px; font-weight:600;">ชื่อห้อง</label>
+      <input type="text" id="roomLabel" value="${o.label}">
+      <label style="font-size:12.5px; font-weight:600; display:block; margin-top:10px;">ประเภทห้อง</label>
+      <select id="roomType">${opts}</select>
+      <div style="margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);">ขนาด: ${o.w.toFixed(2)} × ${o.h.toFixed(2)} ม.</div>
+      <div class="btn-row"><button class="btn-delete" id="delBtn">ลบห้องนี้</button></div>
+    `;
+    document.getElementById('roomLabel').oninput = e => { o.label = e.target.value; renderCanvas(); };
+    document.getElementById('roomType').onchange = e => { o.type = e.target.value; renderCanvas(); };
+    document.getElementById('delBtn').onclick = deleteSelected;
+  } else {
+    const nameMap = { door:'ประตู', window:'หน้าต่าง', aircon:'แอร์' };
+    const label = o.kind==='furniture' ? FURN_DEF[o.subtype].label : nameMap[o.kind];
+    els.props.innerHTML = `
+      <div style="font-weight:600; margin-bottom:6px;">${label}</div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);">ขนาด: ${o.w.toFixed(2)} × ${o.h.toFixed(2)} ม.</div>
+      <div class="btn-row">
+        <button class="btn-rotate" id="rotBtn">หมุน 90°</button>
+        <button class="btn-delete" id="delBtn">ลบ</button>
+      </div>
+    `;
+    document.getElementById('rotBtn').onclick = () => { const t=o.w; o.w=o.h; o.h=t; renderCanvas(); };
+    document.getElementById('delBtn').onclick = deleteSelected;
+  }
+}
+
+function deleteSelected(){
+  const f = curFloor();
+  f.objects = f.objects.filter(o => o.id !== selectedId);
+  selectedId = null;
+  renderProps(); renderCanvas();
+}
+
+// ---------------- SVG drawing ----------------
+function svgOpen(w,h){ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`; }
+function px(m){ return m*SCALE; }
+
+function drawRoom(o, selected){
+  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
+  let s = `<g data-id="${o.id}" data-kind="room">`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#2B3A42" stroke-width="2.5"/>`;
+  s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#2B3A42" font-family="Sarabun,sans-serif">${o.label}</text>`;
+  s += `<text x="${x+w/2}" y="${y+h/2+14}" text-anchor="middle" font-size="11" fill="#5B6B72" font-family="Sarabun,sans-serif">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
+  if (selected){
+    s += `<rect x="${x-3}" y="${y-3}" width="${w+6}" height="${h+6}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="6 4"/>`;
+    [[x,y,'tl'],[x+w,y,'tr'],[x,y+h,'bl'],[x+w,y+h,'br']].forEach(([cx,cy,hd]) => {
+      s += `<rect data-handle="${hd}" data-id="${o.id}" x="${cx-7}" y="${cy-7}" width="14" height="14" fill="#fff" stroke="#D6349B" stroke-width="2"/>`;
+    });
+  }
+  s += `</g>`;
+  return s;
+}
+
+function drawDoor(o, selected){
+  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
+  const horizontal = o.w >= o.h;
+  let s = `<g data-id="${o.id}" data-kind="door">`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#fff" stroke-width="0"/>`;
+  if (horizontal){
+    s += `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#6B4226" stroke-width="4"/>`;
+    s += `<path d="M ${x} ${y+h/2} A ${w} ${w} 0 0 1 ${x+w*0.15} ${y+h/2-w*0.85}" fill="none" stroke="#6B4226" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+  } else {
+    s += `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#6B4226" stroke-width="4"/>`;
+    s += `<path d="M ${x+w/2} ${y} A ${h} ${h} 0 0 0 ${x+w/2-h*0.85} ${y+h*0.15}" fill="none" stroke="#6B4226" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+  }
+  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s += `</g>`;
+  return s;
+}
+
+function drawWindow(o, selected){
+  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
+  let s = `<g data-id="${o.id}" data-kind="window">`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#BFDCE8" stroke="#2B3A42" stroke-width="2"/>`;
+  if (o.w >= o.h) s += `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#2B3A42" stroke-width="1.4"/>`;
+  else s += `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.4"/>`;
+  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s += `</g>`;
+  return s;
+}
+
+function drawAircon(o, selected){
+  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
+  let s = `<g data-id="${o.id}" data-kind="aircon">`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#E7ECEC" stroke="#2B3A42" stroke-width="1.8"/>`;
+  for (let i=1;i<=3;i++){
+    const ly = y + h*(i/4);
+    s += `<line x1="${x+w*0.1}" y1="${ly}" x2="${x+w*0.9}" y2="${ly}" stroke="#8fa3a8" stroke-width="1.2"/>`;
+  }
+  s += `<text x="${x+w/2}" y="${y+h+13}" text-anchor="middle" font-size="10" fill="#5B6B72" font-family="Sarabun,sans-serif">แอร์</text>`;
+  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+16}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s += `</g>`;
+  return s;
+}
+
+function drawFurniture(o, selected){
+  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
+  const def = FURN_DEF[o.subtype];
+  let inner = '';
+  switch(o.subtype){
+    case 'bed':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#EFE0C8" stroke="#2B3A42" stroke-width="2"/>
+        <rect x="${x+w*0.08}" y="${y+h*0.06}" width="${w*0.84}" height="${h*0.2}" fill="#fff" stroke="#2B3A42" stroke-width="1"/>`;
+      break;
+    case 'sofa':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D9C9DB" stroke="#2B3A42" stroke-width="2"/>`;
+      for(let i=1;i<3;i++) inner += `<line x1="${x+w*i/3}" y1="${y}" x2="${x+w*i/3}" y2="${y+h}" stroke="#2B3A42" stroke-width="1"/>`;
+      break;
+    case 'table':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DCC9A6" stroke="#2B3A42" stroke-width="2"/>
+        <ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.38}" ry="${h*0.32}" fill="none" stroke="#2B3A42" stroke-width="1"/>`;
+      break;
+    case 'wardrobe':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#C9B79C" stroke="#2B3A42" stroke-width="2"/>
+        <line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.2"/>`;
+      break;
+    case 'toilet':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h*0.3}" fill="#fff" stroke="#2B3A42" stroke-width="1.6"/>
+        <ellipse cx="${x+w/2}" cy="${y+h*0.65}" rx="${w*0.42}" ry="${h*0.35}" fill="#fff" stroke="#2B3A42" stroke-width="1.6"/>`;
+      break;
+    case 'sink':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#fff" stroke="#2B3A42" stroke-width="1.6"/>
+        <ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.32}" ry="${h*0.28}" fill="#D6E6EC" stroke="#2B3A42" stroke-width="1"/>`;
+      break;
+    case 'stove':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DADFE0" stroke="#2B3A42" stroke-width="2"/>`;
+      [[0.3,0.3],[0.7,0.3],[0.3,0.7],[0.7,0.7]].forEach(([fx,fy]) => {
+        inner += `<circle cx="${x+w*fx}" cy="${y+h*fy}" r="${Math.min(w,h)*0.12}" fill="none" stroke="#2B3A42" stroke-width="1.2"/>`;
+      });
+      break;
+    case 'tv':
+      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#2B3A42" stroke="#2B3A42" stroke-width="2"/>
+        <rect x="${x+w*0.06}" y="${y+h*0.15}" width="${w*0.88}" height="${h*0.7}" fill="#5B6B72"/>`;
+      break;
+  }
+  let s = `<g data-id="${o.id}" data-kind="furniture">${inner}`;
+  s += `<text x="${x+w/2}" y="${y+h+11}" text-anchor="middle" font-size="9.5" fill="#5B6B72" font-family="Sarabun,sans-serif">${def.label}</text>`;
+  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s += `</g>`;
+  return s;
+}
+
+function renderCanvas(){
+  const W = state.width, D = state.depth;
+  const pxW = px(W)+MARGIN.left+MARGIN.right, pxH = px(D)+MARGIN.top+MARGIN.bottom;
+  let s = svgOpen(pxW, pxH);
+  s += `<rect x="0" y="0" width="${pxW}" height="${pxH}" fill="#FBF9F3"/>`;
+  s += `<rect x="${MARGIN.left}" y="${MARGIN.top}" width="${px(W)}" height="${px(D)}" fill="none" stroke="#c9c0a6" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s += `<text class="dim" x="${MARGIN.left+px(W)/2}" y="${MARGIN.top-12}" text-anchor="middle" font-size="18" fill="#D6349B" font-family="Caveat,cursive">${W.toFixed(1)} ม.</text>`;
+  s += `<text class="dim" x="${MARGIN.left+px(W)+18}" y="${MARGIN.top+px(D)/2}" text-anchor="middle" font-size="18" fill="#D6349B" font-family="Caveat,cursive" transform="rotate(90 ${MARGIN.left+px(W)+18} ${MARGIN.top+px(D)/2})">${D.toFixed(1)} ม.</text>`;
+
+  const f = curFloor();
+  f.objects.filter(o=>o.kind==='room').forEach(o => s += drawRoom(o, o.id===selectedId));
+  f.objects.filter(o=>o.kind!=='room').forEach(o => {
+    if (o.kind==='door') s += drawDoor(o, o.id===selectedId);
+    else if (o.kind==='window') s += drawWindow(o, o.id===selectedId);
+    else if (o.kind==='aircon') s += drawAircon(o, o.id===selectedId);
+    else if (o.kind==='furniture') s += drawFurniture(o, o.id===selectedId);
+  });
+
+  if (previewRoom){
+    const x = MARGIN.left+px(previewRoom.x), y = MARGIN.top+px(previewRoom.y), w=px(previewRoom.w), h=px(previewRoom.h);
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(214,52,155,0.08)" stroke="#D6349B" stroke-width="2" stroke-dasharray="6 4"/>`;
+  }
+
+  s += `</svg>`;
+  els.canvasWrap.innerHTML = s;
+}
+
+// ---------------- Interaction ----------------
+function toMeters(evt){
+  const svg = els.canvasWrap.querySelector('svg');
+  if (!svg) return {x:0,y:0};
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX; pt.y = evt.clientY;
+  const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+  return { x: (p.x - MARGIN.left)/SCALE, y: (p.y - MARGIN.top)/SCALE };
+}
+
+function hitTestHandle(pt){
+  if (!selectedId) return null;
+  const o = findObj(selectedId);
+  if (!o || o.kind!=='room') return null;
+  const corners = { tl:[o.x,o.y], tr:[o.x+o.w,o.y], bl:[o.x,o.y+o.h], br:[o.x+o.w,o.y+o.h] };
+  const thresh = 0.22;
+  for (const key in corners){
+    const [cx,cy] = corners[key];
+    if (Math.abs(pt.x-cx)<thresh && Math.abs(pt.y-cy)<thresh) return { handle:key, room:o };
+  }
+  return null;
+}
+
+function hitTestObject(pt){
+  const objs = curFloor().objects;
+  for (let i=objs.length-1;i>=0;i--){
+    const o = objs[i];
+    if (pt.x>=o.x-0.05 && pt.x<=o.x+o.w+0.05 && pt.y>=o.y-0.05 && pt.y<=o.y+o.h+0.05) return o;
+  }
+  return null;
+}
+
+function anchorFor(handle, room){
+  if (handle==='tl') return { x: room.x+room.w, y: room.y+room.h };
+  if (handle==='tr') return { x: room.x, y: room.y+room.h };
+  if (handle==='bl') return { x: room.x+room.w, y: room.y };
+  return { x: room.x, y: room.y };
+}
+
+els.canvasWrap.addEventListener('pointerdown', e => {
+  const pt = toMeters(e);
+  const hHit = hitTestHandle(pt);
+  if (hHit){
+    resizing = { room: hHit.room, anchor: anchorFor(hHit.handle, hHit.room) };
+    e.preventDefault();
+    return;
+  }
+  const hit = hitTestObject(pt);
+  if (hit){
+    selectedId = hit.id;
+    movingId = hit.id;
+    dragOffset = { x: pt.x-hit.x, y: pt.y-hit.y };
+    renderProps(); renderCanvas();
+    e.preventDefault();
+    return;
+  }
+  // empty area
+  if (currentTool==='room'){
+    const cx = clamp(snap(pt.x),0,state.width), cy = clamp(snap(pt.y),0,state.depth);
+    drawingRoom = { startX: cx, startY: cy };
+    previewRoom = { x:cx, y:cy, w:0, h:0 };
+  } else if (currentTool==='door' || currentTool==='window' || currentTool==='aircon'){
+    const def = DEFAULT_SIZE[currentTool];
+    const cx = clamp(snap(pt.x - def.w/2), 0, state.width-def.w);
+    const cy = clamp(snap(pt.y - def.h/2), 0, state.depth-def.h);
+    const obj = { id:'o'+(uid++), kind: currentTool, x:cx, y:cy, w:def.w, h:def.h };
+    curFloor().objects.push(obj);
+    selectedId = obj.id;
+    renderProps(); renderCanvas();
+  } else if (currentTool==='furniture' && currentFurniture){
+    const def = FURN_DEF[currentFurniture];
+    const cx = clamp(snap(pt.x - def.w/2), 0, state.width-def.w);
+    const cy = clamp(snap(pt.y - def.h/2), 0, state.depth-def.h);
+    const obj = { id:'o'+(uid++), kind:'furniture', subtype: currentFurniture, x:cx, y:cy, w:def.w, h:def.h };
+    curFloor().objects.push(obj);
+    selectedId = obj.id;
+    renderProps(); renderCanvas();
+  } else {
+    selectedId = null;
+    renderProps(); renderCanvas();
+  }
+});
+
+els.canvasWrap.addEventListener('pointermove', e => {
+  if (movingId){
+    const pt = toMeters(e);
+    const o = findObj(movingId);
+    if (o){
+      o.x = clamp(snap(pt.x - dragOffset.x), 0, state.width - o.w);
+      o.y = clamp(snap(pt.y - dragOffset.y), 0, state.depth - o.h);
+      renderCanvas();
+    }
+    return;
+  }
+  if (resizing){
+    const pt = toMeters(e);
+    const anchor = resizing.anchor;
+    let px_ = snap(pt.x), py_ = snap(pt.y);
+    if (Math.abs(px_-anchor.x) < 0.9) px_ = anchor.x + (px_>=anchor.x ? 0.9 : -0.9);
+    if (Math.abs(py_-anchor.y) < 0.9) py_ = anchor.y + (py_>=anchor.y ? 0.9 : -0.9);
+    px_ = clamp(px_, 0, state.width); py_ = clamp(py_, 0, state.depth);
+    const room = resizing.room;
+    room.x = Math.min(anchor.x, px_); room.w = Math.abs(px_-anchor.x);
+    room.y = Math.min(anchor.y, py_); room.h = Math.abs(py_-anchor.y);
+    renderCanvas();
+    return;
+  }
+  if (drawingRoom){
+    const pt = toMeters(e);
+    const cx = clamp(snap(pt.x),0,state.width), cy = clamp(snap(pt.y),0,state.depth);
+    previewRoom = {
+      x: Math.min(drawingRoom.startX, cx), y: Math.min(drawingRoom.startY, cy),
+      w: Math.abs(cx-drawingRoom.startX), h: Math.abs(cy-drawingRoom.startY)
+    };
+    renderCanvas();
+  }
+});
+
+window.addEventListener('pointerup', () => {
+  if (drawingRoom && previewRoom){
+    const w = Math.max(0.9, previewRoom.w), h = Math.max(0.9, previewRoom.h);
+    const obj = { id:'o'+(uid++), kind:'room', x:previewRoom.x, y:previewRoom.y, w, h, type:'other', label: ROOM_LABEL['other'] };
+    curFloor().objects.push(obj);
+    selectedId = obj.id;
+  }
+  movingId = null; dragOffset = null; resizing = null; drawingRoom = null; previewRoom = null;
+  renderProps(); renderCanvas();
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.key==='Delete' || e.key==='Backspace') && selectedId){
+    const active = document.activeElement;
+    if (active && (active.tagName==='INPUT' || active.tagName==='SELECT')) return;
+    deleteSelected();
+  }
+});
+
+els.width.addEventListener('input', e => { state.width = parseFloat(e.target.value); els.widthVal.textContent = state.width.toFixed(1); renderCanvas(); });
+els.depth.addEventListener('input', e => { state.depth = parseFloat(e.target.value); els.depthVal.textContent = state.depth.toFixed(1); renderCanvas(); });
+
+document.getElementById('clearFloorBtn').onclick = () => {
+  curFloor().objects = []; selectedId = null; renderProps(); renderCanvas();
+};
+
+document.getElementById('downloadBtn').onclick = () => {
+  const svgEl = els.canvasWrap.querySelector('svg');
+  const svgStr = new XMLSerializer().serializeToString(svgEl);
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const factor = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = svgEl.viewBox.baseVal.width * factor;
+    canvas.height = svgEl.viewBox.baseVal.height * factor;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FBF9F3'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(pngBlob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(pngBlob);
+      a.download = `ผังบ้าน-ชั้น${state.activeFloor+1}.png`;
+      a.click();
+    });
+  };
+  img.src = url;
+};
+
+buildToolbar();
+buildFloorTabs();
+renderProps();
+renderCanvas();
+</script>
+</body>
+</html>
+
