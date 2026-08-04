@@ -8,96 +8,72 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F5F1E6; --paper-line:#e6ddc8;
-    --ink:#2B3A42; --ink-soft:#5B6B72;
-    --accent:#D6349B; --card:#ffffff;
-    --shadow: 0 1px 2px rgba(43,58,66,.06), 0 6px 18px rgba(43,58,66,.08);
+    --paper:#F7F4EE; --line:#E4DFD3;
+    --ink:#221F1B; --ink-soft:#6E675C;
+    --accent:#7C3048; --accent-soft:#F1DFE2; --accent-ink:#ffffff;
+    --card:#ffffff;
+    --shadow: 0 1px 2px rgba(34,31,27,.05), 0 10px 26px rgba(34,31,27,.09);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; height:100%;}
   body{
     font-family:'Sarabun',sans-serif; color:var(--ink); background:var(--paper);
-    display:flex; justify-content:center;
+    display:flex; justify-content:center; font-size:15px;
   }
-  .app-frame{
-    width:100%; max-width:480px; min-height:100vh;
-    display:flex; flex-direction:column;
-    background:var(--paper);
-    position:relative;
-  }
-  header{padding:14px 16px 6px;}
-  header .eyebrow{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); font-weight:600;}
-  header h1{margin:4px 0; font-size:19px; font-weight:700;}
+  .app-frame{ width:100%; max-width:480px; min-height:100vh; display:flex; flex-direction:column; background:var(--paper); position:relative; }
+  header{padding:16px 16px 8px;}
+  header .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:600;}
+  header h1{margin:5px 0; font-size:21px; font-weight:700; letter-spacing:-.01em;}
 
-  .viewtabs{display:flex; gap:6px; padding:8px 12px; overflow-x:auto;}
-  .viewtab{
-    flex:none; padding:8px 12px; border-radius:20px; font-size:12.5px; font-weight:600;
-    background:var(--card); border:1px solid var(--paper-line); color:var(--ink-soft); cursor:pointer; white-space:nowrap;
-  }
+  .viewtabs{display:flex; gap:7px; padding:6px 14px; overflow-x:auto;}
+  .viewtab{ flex:none; padding:9px 14px; border-radius:20px; font-size:13.5px; font-weight:600; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
   .viewtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
-  .settings-toggle{
-    margin:0 12px 8px; padding:8px 12px; border-radius:10px; background:var(--card);
-    border:1px solid var(--paper-line); font-size:12.5px; font-weight:600; color:var(--ink-soft);
-    display:flex; justify-content:space-between; align-items:center; cursor:pointer;
-  }
-  .settings-panel{
-    margin:0 12px 8px; padding:12px; border-radius:10px; background:var(--card); box-shadow:var(--shadow);
-    display:none; gap:8px;
-  }
+  .settings-toggle{ margin:0 14px 8px; padding:10px 12px; border-radius:10px; background:var(--card); border:1px solid var(--line); font-size:13.5px; font-weight:600; color:var(--ink-soft); display:flex; justify-content:space-between; align-items:center; cursor:pointer; min-height:44px; }
+  .settings-panel{ margin:0 14px 8px; padding:12px; border-radius:10px; background:var(--card); box-shadow:var(--shadow); display:none; gap:10px; }
   .settings-panel.open{display:grid; grid-template-columns:1fr 1fr 1fr;}
-  .settings-panel .field label{display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:3px;}
-  .settings-panel input[type=number]{
-    width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--paper-line);
-    border-radius:6px; padding:6px 4px; font-size:13px; text-align:center;
-  }
+  .settings-panel .field label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:4px;}
+  .settings-panel input[type=number]{ width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--line); border-radius:8px; padding:9px 4px; font-size:16px; text-align:center; }
 
-  .floortabs{display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; align-items:center;}
-  .tab{padding:6px 12px; border-radius:16px; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--paper-line); background:var(--card); color:var(--ink-soft); flex:none;}
+  .floortabs{display:flex; gap:6px; padding:0 14px 8px; overflow-x:auto; align-items:center;}
+  .tab{padding:7px 13px; border-radius:16px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); flex:none;}
   .tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
-  .tab-icon-btn{flex:none; width:26px; height:26px; border-radius:50%; border:1px dashed var(--paper-line); background:#fff; cursor:pointer; font-size:14px; color:var(--ink-soft); line-height:1;}
+  .tab-icon-btn{flex:none; width:30px; height:30px; border-radius:50%; border:1px dashed var(--line); background:#fff; cursor:pointer; font-size:15px; color:var(--ink-soft); line-height:1;}
 
-  .toolbar{display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto;}
-  .tool-btn{
-    flex:none; display:flex; flex-direction:column; align-items:center; gap:2px;
-    padding:7px 9px; border-radius:10px; border:1px solid var(--paper-line); background:var(--card);
-    cursor:pointer; font-size:10.5px; font-weight:500; color:var(--ink); min-width:52px;
-  }
+  .toolbar{display:flex; gap:7px; padding:0 14px 8px; overflow-x:auto;}
+  .tool-btn{ flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--card); cursor:pointer; font-size:11px; font-weight:500; color:var(--ink); min-width:56px; min-height:48px; }
   .tool-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
-  .canvas-card{
-    margin:0 12px 10px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);
-    overflow:hidden; flex:1; display:flex; flex-direction:column;
-  }
-  .canvas-wrap{flex:1; display:flex; justify-content:center; align-items:center; padding:10px; touch-action:none; min-height:340px;}
-  .canvas-wrap svg{max-width:100%; height:auto; user-select:none;}
-  .canvas-hint{font-size:11px; color:var(--ink-soft); text-align:center; padding:0 12px 10px;}
+  .canvas-card{ margin:0 14px 10px; background:var(--card); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; flex:1; display:flex; flex-direction:column; position:relative; }
+  .canvas-wrap{flex:1; display:flex; justify-content:center; align-items:center; padding:8px; touch-action:none; min-height:360px; overflow:hidden;}
+  .canvas-wrap svg{max-width:100%; max-height:100%; user-select:none; display:block;}
+  .canvas-hint{font-size:12.5px; color:var(--ink-soft); text-align:center; padding:0 14px 10px; line-height:1.5;}
 
-  .foot-actions{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-top:1px solid var(--paper-line); gap:8px;}
-  .icon-btn{background:transparent; border:1px solid var(--paper-line); color:var(--ink-soft); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;}
-  .download-btn{background:var(--accent); color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; font-size:12.5px; cursor:pointer;}
+  .zoom-controls{ position:absolute; right:10px; bottom:10px; display:flex; flex-direction:column; gap:6px; z-index:2; }
+  .zoom-controls button{ width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.92); color:var(--ink); font-size:17px; font-weight:600; cursor:pointer; box-shadow:var(--shadow); }
+  .zoom-controls button#zoomReset{font-size:14px;}
 
-  .sheet-backdrop{position:fixed; inset:0; background:rgba(43,58,66,.35); z-index:20; display:none;}
+  .foot-actions{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-top:1px solid var(--line); gap:8px;}
+  .icon-btn{background:transparent; border:1px solid var(--line); color:var(--ink-soft); padding:9px 13px; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; min-height:42px;}
+  .download-btn{background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:9px; font-weight:600; font-size:13.5px; cursor:pointer; min-height:42px;}
+
+  .sheet-backdrop{position:fixed; inset:0; background:rgba(34,31,27,.4); z-index:20; display:none;}
   .sheet-backdrop.open{display:block;}
-  .sheet{
-    position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:100%; max-width:480px;
-    background:#fff; border-radius:16px 16px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,.18);
-    padding:16px; z-index:21; transition:transform .2s ease; max-height:70vh; overflow-y:auto;
-  }
+  .sheet{ position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:100%; max-width:480px; background:#fff; border-radius:18px 18px 0 0; box-shadow:0 -8px 26px rgba(0,0,0,.2); padding:18px; z-index:21; transition:transform .2s ease; max-height:72vh; overflow-y:auto; }
   .sheet.closed{transform:translateX(-50%) translateY(100%);}
-  .sheet-handle{width:36px; height:4px; background:var(--paper-line); border-radius:2px; margin:0 auto 12px;}
-  .sheet h3{margin:0 0 10px; font-size:14.5px;}
-  .sheet input[type=text]{width:100%; border:1px solid var(--paper-line); border-radius:8px; padding:8px 10px; font-size:14px; font-family:'Sarabun',sans-serif;}
-  .sheet select{width:100%; border:1px solid var(--paper-line); border-radius:8px; padding:8px 10px; font-size:14px; font-family:'Sarabun',sans-serif; background:#fff;}
-  .num-row{display:flex; gap:8px; margin-top:8px;}
+  .sheet-handle{width:38px; height:4px; background:var(--line); border-radius:2px; margin:0 auto 14px;}
+  .sheet h3{margin:0 0 12px; font-size:16px; font-weight:700;}
+  .sheet input[type=text]{width:100%; border:1px solid var(--line); border-radius:9px; padding:10px 12px; font-size:16px; font-family:'Sarabun',sans-serif;}
+  .sheet select{width:100%; border:1px solid var(--line); border-radius:9px; padding:10px 12px; font-size:16px; font-family:'Sarabun',sans-serif; background:#fff;}
+  .num-row{display:flex; gap:9px; margin-top:9px;}
   .num-field{flex:1;}
-  .num-field label{font-size:11.5px; color:var(--ink-soft); display:block; margin-bottom:3px;}
-  .num-field input{width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--paper-line); border-radius:8px; padding:7px 6px; font-size:13.5px; text-align:center;}
-  .sheet .btn-row{display:flex; gap:8px; margin-top:14px;}
-  .sheet button.act{flex:1; border:none; border-radius:10px; padding:10px; font-weight:600; font-size:13px; cursor:pointer;}
-  .btn-rotate{background:var(--paper); border:1px solid var(--paper-line) !important; color:var(--ink);}
-  .btn-delete{background:#c1435c; color:#fff;}
-  .sheet .field-label{font-size:11.5px; color:var(--ink-soft); margin-top:10px; display:block;}
+  .num-field label{font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;}
+  .num-field input{width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--line); border-radius:9px; padding:9px 6px; font-size:16px; text-align:center;}
+  .sheet .btn-row{display:flex; gap:9px; margin-top:16px;}
+  .sheet button.act{flex:1; border:none; border-radius:11px; padding:12px; font-weight:600; font-size:14px; cursor:pointer;}
+  .btn-rotate{background:var(--paper); border:1px solid var(--line) !important; color:var(--ink);}
+  .btn-delete{background:#9B3A44; color:#fff;}
+  .sheet .field-label{font-size:12px; color:var(--ink-soft); margin-top:12px; display:block;}
 </style>
 </head>
 <body>
@@ -121,6 +97,11 @@
 
   <div class="canvas-card">
     <div class="canvas-wrap" id="canvasWrap"></div>
+    <div class="zoom-controls">
+      <button id="zoomIn">+</button>
+      <button id="zoomReset">⟲</button>
+      <button id="zoomOut">−</button>
+    </div>
   </div>
   <div class="canvas-hint" id="canvasHint"></div>
 
@@ -154,19 +135,24 @@ let selectedId = null;
 let wireStart = null;
 
 let movingId=null, dragOffset=null, resizing=null, drawingRoom=null, previewRoom=null;
+let viewport = { x:0, y:0, zoom:1 };
 
-let theta = Math.PI/4, phi = 0.6, dragging3d=false, lastX=0, lastY=0;
+let theta = Math.PI/4, phi = 0.6, dragging3d=false, lastX=0, lastY=0, zoom3d=1, projScale=30;
+
+let activePointers = new Map();
+let pinch = null;
+let panning = false, panMoved = false, lastInternal = null;
 
 const ROOM_TYPES = [
-  {key:'bedroom',label:'ห้องนอน',color:'#F4EADA'}, {key:'bathroom',label:'ห้องน้ำ',color:'#E2EDF4'},
-  {key:'kitchen',label:'ห้องครัว',color:'#E6EFE8'}, {key:'living',label:'ห้องรับแขก',color:'#ECE6F4'},
-  {key:'office',label:'ห้องทำงาน',color:'#FBEAE0'}, {key:'balcony',label:'ระเบียง',color:'#E8F3E3'},
-  {key:'garage',label:'ที่จอดรถ',color:'#EDEDED'}, {key:'other',label:'พื้นที่อื่นๆ',color:'#F0EFEC'},
+  {key:'bedroom',label:'ห้องนอน',color:'#EFE6D8'}, {key:'bathroom',label:'ห้องน้ำ',color:'#DCE4E3'},
+  {key:'kitchen',label:'ห้องครัว',color:'#E1E5DA'}, {key:'living',label:'ห้องรับแขก',color:'#E5E0E2'},
+  {key:'office',label:'ห้องทำงาน',color:'#EBE1D6'}, {key:'balcony',label:'ระเบียง',color:'#DDE4D7'},
+  {key:'garage',label:'ที่จอดรถ',color:'#E3E1DC'}, {key:'other',label:'พื้นที่อื่นๆ',color:'#EAE7E0'},
 ];
 const ROOM_COLOR={}, ROOM_LABEL={}; ROOM_TYPES.forEach(t=>{ROOM_COLOR[t.key]=t.color; ROOM_LABEL[t.key]=t.label;});
 
 const DEFAULTS = {
-  door:{w:.9,h:.2,min:.2,label:'ประตู'}, window:{w:1.2,h:.15,min:.15,label:'หน้าต่าง'}, aircon:{w:.8,h:.25,min:.2,label:'แอร์'},
+  door:{w:.9,h:.9,min:.5,label:'ประตู'}, window:{w:1.2,h:.15,min:.15,label:'หน้าต่าง'}, aircon:{w:.8,h:.25,min:.2,label:'แอร์'},
   bed:{w:1.6,h:2.0,min:.3,label:'เตียง'}, sofa:{w:1.8,h:.85,min:.3,label:'โซฟา'}, table:{w:1.2,h:.8,min:.3,label:'โต๊ะอาหาร'},
   wardrobe:{w:1.2,h:.6,min:.3,label:'ตู้เสื้อผ้า'}, toilet:{w:.45,h:.65,min:.2,label:'โถส้วม'}, sink:{w:.55,h:.45,min:.2,label:'อ่างล้างหน้า'},
   stove:{w:.6,h:.6,min:.2,label:'เตา'}, tv:{w:1.1,h:.35,min:.2,label:'ทีวี'},
@@ -228,8 +214,8 @@ function buildFloorTabs(){
 }
 
 /* ---------------- toolbar ---------------- */
-function toolIcon(fill){ return `<svg width="18" height="18"><rect x="1" y="1" width="16" height="16" rx="3" fill="${fill}" stroke="#2B3A42" stroke-width="1.4"/></svg>`; }
-function selectIcon(){ return `<svg width="18" height="18"><path d="M3 2 L15 9 L9.5 10.2 L12.5 15.5 L10 17 L7 11.7 L3 15 Z" fill="#2B3A42"/></svg>`; }
+function toolIcon(fill){ return `<svg width="18" height="18"><rect x="1" y="1" width="16" height="16" rx="3" fill="${fill}" stroke="#221F1B" stroke-width="1.4"/></svg>`; }
+function selectIcon(){ return `<svg width="18" height="18"><path d="M3 2 L15 9 L9.5 10.2 L12.5 15.5 L10 17 L7 11.7 L3 15 Z" fill="#221F1B"/></svg>`; }
 function lineIcon(color){ return `<svg width="18" height="18"><line x1="2" y1="9" x2="16" y2="9" stroke="${color}" stroke-width="3"/></svg>`; }
 
 function buildToolbar(){
@@ -244,34 +230,34 @@ function buildToolbar(){
   };
   add('select', null, 'เลือก/ย้าย', selectIcon());
   if (state.view==='plan2d'){
-    add('room', null, 'วาดห้อง', toolIcon('#F4EADA'));
-    add('door', null, 'ประตู', toolIcon('#6B4226'));
-    add('window', null, 'หน้าต่าง', toolIcon('#BFDCE8'));
-    add('aircon', null, 'แอร์', toolIcon('#dfe8ea'));
+    add('room', null, 'วาดห้อง', toolIcon('#EFE6D8'));
+    add('door', null, 'ประตู', toolIcon('#8A5A3A'));
+    add('window', null, 'หน้าต่าง', toolIcon('#B9C9CE'));
+    add('aircon', null, 'แอร์', toolIcon('#dfe3e2'));
     ['bed','sofa','table','wardrobe','toilet','sink','stove','tv'].forEach(k=>add('furniture',k,DEFAULTS[k].label,toolIcon('#e4ddcf')));
-    add('furniture','tree','ต้นไม้',toolIcon('#bfe0b0'));
+    add('furniture','tree','ต้นไม้',toolIcon('#A9C398'));
     add('furniture','car','รถยนต์',toolIcon('#c9d3da'));
   } else if (state.view==='electrical'){
-    add('point','switch','สวิตช์',toolIcon('#f5c451'));
-    add('point','outlet','ปลั๊ก',toolIcon('#f59e42'));
-    add('point','light','โคมไฟ',toolIcon('#ffe08a'));
-    add('wire', null, 'ลากสายไฟ', lineIcon('#e8a13a'));
+    add('point','switch','สวิตช์',toolIcon('#E3B94F'));
+    add('point','outlet','ปลั๊ก',toolIcon('#D98A4B'));
+    add('point','light','โคมไฟ',toolIcon('#F0D889'));
+    add('wire', null, 'ลากสายไฟ', lineIcon('#D98A4B'));
   } else if (state.view==='plumbing'){
-    add('point','supply','จุดจ่ายน้ำ',toolIcon('#7fb3d5'));
-    add('point','drain','ท่อระบาย',toolIcon('#5fa8a0'));
-    add('point','heater','เครื่องทำน้ำอุ่น',toolIcon('#e08a52'));
-    add('point','septic','ถังบำบัด',toolIcon('#a9825f'));
-    add('wire', null, 'ลากท่อน้ำ', lineIcon('#4a90c4'));
+    add('point','supply','จุดจ่ายน้ำ',toolIcon('#7FA8C4'));
+    add('point','drain','ท่อระบาย',toolIcon('#5F9891'));
+    add('point','heater','เครื่องทำน้ำอุ่น',toolIcon('#C57D52'));
+    add('point','septic','ถังบำบัด',toolIcon('#A08262'));
+    add('wire', null, 'ลากท่อน้ำ', lineIcon('#4A7FA8'));
   }
   els.toolbar.style.display = state.view==='elevation3d' ? 'none' : 'flex';
   updateHint();
 }
 
 function updateHint(){
-  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากนิ้ว/เมาส์บนภาพเพื่อหมุนดูรอบบ้าน — ต้นไม้และรถจะดึงมาจากผังชั้น 1'; return; }
-  if (currentTool==='room') els.canvasHint.textContent = 'ลากบนผังเพื่อวาดห้อง';
+  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากเพื่อหมุนดูรอบบ้าน · จีบสองนิ้ว/เมาส์ล้อเพื่อซูม'; return; }
+  if (currentTool==='room') els.canvasHint.textContent = 'ลากบนผังเพื่อวาดห้อง · จีบสองนิ้วเพื่อซูม';
   else if (currentTool==='wire') els.canvasHint.textContent = 'แตะจุดแรก แล้วแตะจุดที่สองเพื่อลากเส้นเชื่อม';
-  else if (currentTool==='select') els.canvasHint.textContent = 'แตะวัตถุเพื่อย้าย/แก้ไข ลากมุมกรอบเพื่อปรับขนาด';
+  else if (currentTool==='select') els.canvasHint.textContent = 'แตะวัตถุเพื่อย้าย · ลากพื้นที่ว่างเพื่อเลื่อนมุมมอง · จีบสองนิ้วเพื่อซูม';
   else els.canvasHint.textContent = 'แตะบนผังเพื่อวางตำแหน่ง';
 }
 
@@ -308,10 +294,7 @@ function renderProps(){
   }
 
   if (o.kind==='elecPoint' || o.kind==='plumbPoint'){
-    els.propBody.innerHTML = `
-      <h3>${DEFAULTS[o.subtype].label}</h3>
-      <div class="btn-row"><button class="act btn-delete" id="pDel">ลบ</button></div>
-    `;
+    els.propBody.innerHTML = `<h3>${DEFAULTS[o.subtype].label}</h3><div class="btn-row"><button class="act btn-delete" id="pDel">ลบ</button></div>`;
     document.getElementById('pDel').onclick = deleteSelected;
     return;
   }
@@ -322,7 +305,26 @@ function renderProps(){
     return;
   }
 
-  // door / window / aircon / furniture
+  if (o.kind==='door'){
+    els.propBody.innerHTML = `
+      <h3>ประตู</h3>
+      <div class="num-row">
+        <div class="num-field"><label>ความกว้างประตู (ม.)</label><input type="number" id="pW" step="0.05" min="0.5" value="${o.w.toFixed(2)}"></div>
+        <div class="num-field"><label>มุมหมุน (องศา)</label><input type="number" id="pR" step="15" value="${Math.round(o.rotation||0)}"></div>
+      </div>
+      <div class="btn-row">
+        <button class="act btn-rotate" id="pRot90">หมุน 90°</button>
+        <button class="act btn-delete" id="pDel">ลบ</button>
+      </div>
+    `;
+    document.getElementById('pW').oninput = e=>{ const v=Math.max(0.5, parseFloat(e.target.value)||0.9); o.w=v; o.h=v; renderCanvas(); };
+    document.getElementById('pR').oninput = e=>{ o.rotation = parseFloat(e.target.value)||0; renderCanvas(); };
+    document.getElementById('pRot90').onclick = ()=>{ o.rotation = ((o.rotation||0)+90)%360; renderProps(); renderCanvas(); };
+    document.getElementById('pDel').onclick = deleteSelected;
+    return;
+  }
+
+  // window / aircon / furniture
   const label = o.kind==='furniture' ? DEFAULTS[o.subtype].label : DEFAULTS[o.kind].label;
   const min = o.kind==='furniture' ? DEFAULTS[o.subtype].min : DEFAULTS[o.kind].min;
   els.propBody.innerHTML = `
@@ -331,9 +333,7 @@ function renderProps(){
       <div class="num-field"><label>กว้าง (ม.)</label><input type="number" id="pW" step="0.05" min="${min}" value="${o.w.toFixed(2)}"></div>
       <div class="num-field"><label>ยาว (ม.)</label><input type="number" id="pH" step="0.05" min="${min}" value="${o.h.toFixed(2)}"></div>
     </div>
-    <div class="num-row">
-      <div class="num-field" style="flex:1 1 100%;"><label>มุมหมุน (องศา)</label><input type="number" id="pR" step="15" value="${Math.round(o.rotation||0)}"></div>
-    </div>
+    <div class="num-row"><div class="num-field" style="flex:1 1 100%;"><label>มุมหมุน (องศา)</label><input type="number" id="pR" step="15" value="${Math.round(o.rotation||0)}"></div></div>
     <div class="btn-row">
       <button class="act btn-rotate" id="pRot90">หมุน 90°</button>
       <button class="act btn-delete" id="pDel">ลบ</button>
@@ -352,7 +352,6 @@ function deleteSelected(){
   if (idx>=0){
     const removedId = arr[idx].id;
     arr.splice(idx,1);
-    // cascade delete wires/pipes referencing this point
     for (let i=arr.length-1;i>=0;i--){
       if ((arr[i].kind==='wire'||arr[i].kind==='pipe') && (arr[i].fromId===removedId || arr[i].toId===removedId)) arr.splice(i,1);
     }
@@ -361,7 +360,10 @@ function deleteSelected(){
 }
 
 /* ---------------- 2D drawing helpers ---------------- */
-function svgOpen(w,h){ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`; }
+function svgOpenViewBox(pxW,pxH){
+  const vw = pxW/viewport.zoom, vh = pxH/viewport.zoom;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewport.x.toFixed(1)} ${viewport.y.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" width="${pxW}" height="${pxH}">`;
+}
 function px(m){ return m*SCALE; }
 function wx(m){ return MARGIN.left+px(m); }
 function wy(m){ return MARGIN.top+px(m); }
@@ -372,54 +374,62 @@ function rotWrap(o, inner){
 }
 function selOutline(o){
   const x=wx(o.x)-4, y=wy(o.y)-4, w=px(o.w)+8, h=px(o.h)+8;
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="5 3"/>`;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${cssVar('--accent')}" stroke-width="2" stroke-dasharray="5 3"/>`;
 }
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function handles(o){
   const pts = [[o.x,o.y,'tl'],[o.x+o.w,o.y,'tr'],[o.x,o.y+o.h,'bl'],[o.x+o.w,o.y+o.h,'br']];
   return pts.map(([mx,my,hd])=>{
     const x=wx(mx), y=wy(my);
-    return `<rect data-handle="${hd}" data-id="${o.id}" x="${x-9}" y="${y-9}" width="18" height="18" fill="#fff" stroke="#D6349B" stroke-width="2"/>`;
+    return `<rect data-handle="${hd}" data-id="${o.id}" x="${x-9}" y="${y-9}" width="18" height="18" fill="#fff" stroke="${cssVar('--accent')}" stroke-width="2"/>`;
   }).join('');
 }
 
 function drawRoom(o, sel){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
   let s = `<g data-id="${o.id}">`;
-  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#2B3A42" stroke-width="2.5"/>`;
-  s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="13" font-weight="600" fill="#2B3A42">${o.label}</text>`;
-  s += `<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="10.5" fill="#5B6B72">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#221F1B" stroke-width="2.5"/>`;
+  s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
+  s += `<text x="${x+w/2}" y="${y+h/2+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
   s += `</g>`;
   if (sel) s += selOutline(o) + handles(o);
   return s;
 }
 function drawRoomBackdrop(o){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#f1efe9" stroke="#d8d2c2" stroke-width="1.5"/>
-          <text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" font-size="10.5" fill="#b7b0a0">${o.label}</text>`;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#F1EEE7" stroke="#DAD3C4" stroke-width="1.5"/>
+          <text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" font-size="11" fill="#B4AC9C">${o.label}</text>`;
 }
 
+/* proper architectural door symbol: threshold + open leaf + dashed swing arc */
 function drawDoor(o, sel){
-  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
-  let inner = o.w>=o.h
-    ? `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#6B4226" stroke-width="4"/>`
-    : `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#6B4226" stroke-width="4"/>`;
+  const x=wx(o.x), y=wy(o.y), w=px(o.w);
+  // local: hinge at (x,y); leaf swings down-right into local +x/+y quadrant
+  const closedEndX = x+w, closedEndY = y;
+  const openEndX = x, openEndY = y+w;
+  let inner = `
+    <line x1="${x}" y1="${y}" x2="${closedEndX}" y2="${closedEndY}" stroke="#B4AC9C" stroke-width="1.6"/>
+    <line x1="${x}" y1="${y}" x2="${openEndX}" y2="${openEndY}" stroke="#8A5A3A" stroke-width="3.5"/>
+    <path d="M ${closedEndX} ${closedEndY} A ${w} ${w} 0 0 1 ${openEndX} ${openEndY}" fill="none" stroke="#8A5A3A" stroke-width="1.3" stroke-dasharray="4 4"/>
+    <circle cx="${x}" cy="${y}" r="2.4" fill="#8A5A3A"/>
+  `;
   let s = rotWrap(o, inner);
-  if (sel) s += selOutline(o) + handles(o);
+  if (sel) s += selOutline(o);
   return s;
 }
 function drawWindow(o, sel){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
-  let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#BFDCE8" stroke="#2B3A42" stroke-width="2"/>`;
-  inner += o.w>=o.h ? `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#2B3A42" stroke-width="1.3"/>`
-                    : `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.3"/>`;
+  let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#B9C9CE" stroke="#221F1B" stroke-width="2"/>`;
+  inner += o.w>=o.h ? `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#221F1B" stroke-width="1.3"/>`
+                    : `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#221F1B" stroke-width="1.3"/>`;
   let s = rotWrap(o, inner);
   if (sel) s += selOutline(o) + handles(o);
   return s;
 }
 function drawAircon(o, sel){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
-  let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#E7ECEC" stroke="#2B3A42" stroke-width="1.6"/>`;
-  for (let i=1;i<=3;i++){ const ly=y+h*(i/4); inner += `<line x1="${x+w*0.1}" y1="${ly}" x2="${x+w*0.9}" y2="${ly}" stroke="#8fa3a8" stroke-width="1.1"/>`; }
+  let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#E7EAE9" stroke="#221F1B" stroke-width="1.6"/>`;
+  for (let i=1;i<=3;i++){ const ly=y+h*(i/4); inner += `<line x1="${x+w*0.1}" y1="${ly}" x2="${x+w*0.9}" y2="${ly}" stroke="#9CA6A3" stroke-width="1.1"/>`; }
   let s = rotWrap(o, inner);
   if (sel) s += selOutline(o) + handles(o);
   return s;
@@ -428,19 +438,19 @@ function drawFurniture(o, sel){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
   let inner='';
   switch(o.subtype){
-    case 'bed': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#EFE0C8" stroke="#2B3A42" stroke-width="2"/><rect x="${x+w*0.08}" y="${y+h*0.06}" width="${w*0.84}" height="${h*0.2}" fill="#fff" stroke="#2B3A42" stroke-width="1"/>`; break;
-    case 'sofa': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D9C9DB" stroke="#2B3A42" stroke-width="2"/>` + [1,2].map(i=>`<line x1="${x+w*i/3}" y1="${y}" x2="${x+w*i/3}" y2="${y+h}" stroke="#2B3A42" stroke-width="1"/>`).join(''); break;
-    case 'table': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DCC9A6" stroke="#2B3A42" stroke-width="2"/><ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.38}" ry="${h*0.32}" fill="none" stroke="#2B3A42" stroke-width="1"/>`; break;
-    case 'wardrobe': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#C9B79C" stroke="#2B3A42" stroke-width="2"/><line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.2"/>`; break;
-    case 'toilet': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h*0.3}" fill="#fff" stroke="#2B3A42" stroke-width="1.5"/><ellipse cx="${x+w/2}" cy="${y+h*0.65}" rx="${w*0.42}" ry="${h*0.35}" fill="#fff" stroke="#2B3A42" stroke-width="1.5"/>`; break;
-    case 'sink': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#fff" stroke="#2B3A42" stroke-width="1.5"/><ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.32}" ry="${h*0.28}" fill="#D6E6EC" stroke="#2B3A42" stroke-width="1"/>`; break;
-    case 'stove': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DADFE0" stroke="#2B3A42" stroke-width="2"/>` + [[.3,.3],[.7,.3],[.3,.7],[.7,.7]].map(([fx,fy])=>`<circle cx="${x+w*fx}" cy="${y+h*fy}" r="${Math.min(w,h)*0.12}" fill="none" stroke="#2B3A42" stroke-width="1.1"/>`).join(''); break;
-    case 'tv': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#2B3A42"/><rect x="${x+w*0.06}" y="${y+h*0.15}" width="${w*0.88}" height="${h*0.7}" fill="#5B6B72"/>`; break;
-    case 'tree': inner = `<circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.min(w,h)/2}" fill="#BFE0B0" stroke="#5b8a4a" stroke-width="1.6"/><circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.min(w,h)/5}" fill="#8a6a4a"/>`; break;
-    case 'car': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w*0.18}" fill="#c9d3da" stroke="#2B3A42" stroke-width="1.8"/><rect x="${x+w*0.12}" y="${y+h*0.12}" width="${w*0.76}" height="${h*0.22}" fill="#7fa0b5"/>`; break;
+    case 'bed': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#EFE0C8" stroke="#221F1B" stroke-width="2"/><rect x="${x+w*0.08}" y="${y+h*0.06}" width="${w*0.84}" height="${h*0.2}" fill="#fff" stroke="#221F1B" stroke-width="1"/>`; break;
+    case 'sofa': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D9C9DB" stroke="#221F1B" stroke-width="2"/>` + [1,2].map(i=>`<line x1="${x+w*i/3}" y1="${y}" x2="${x+w*i/3}" y2="${y+h}" stroke="#221F1B" stroke-width="1"/>`).join(''); break;
+    case 'table': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DCC9A6" stroke="#221F1B" stroke-width="2"/><ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.38}" ry="${h*0.32}" fill="none" stroke="#221F1B" stroke-width="1"/>`; break;
+    case 'wardrobe': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#C9B79C" stroke="#221F1B" stroke-width="2"/><line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#221F1B" stroke-width="1.2"/>`; break;
+    case 'toilet': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h*0.3}" fill="#fff" stroke="#221F1B" stroke-width="1.5"/><ellipse cx="${x+w/2}" cy="${y+h*0.65}" rx="${w*0.42}" ry="${h*0.35}" fill="#fff" stroke="#221F1B" stroke-width="1.5"/>`; break;
+    case 'sink': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#fff" stroke="#221F1B" stroke-width="1.5"/><ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.32}" ry="${h*0.28}" fill="#D6E6EC" stroke="#221F1B" stroke-width="1"/>`; break;
+    case 'stove': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DADFE0" stroke="#221F1B" stroke-width="2"/>` + [[.3,.3],[.7,.3],[.3,.7],[.7,.7]].map(([fx,fy])=>`<circle cx="${x+w*fx}" cy="${y+h*fy}" r="${Math.min(w,h)*0.12}" fill="none" stroke="#221F1B" stroke-width="1.1"/>`).join(''); break;
+    case 'tv': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#221F1B"/><rect x="${x+w*0.06}" y="${y+h*0.15}" width="${w*0.88}" height="${h*0.7}" fill="#6E675C"/>`; break;
+    case 'tree': inner = `<circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.min(w,h)/2}" fill="#A9C398" stroke="#5b7a4a" stroke-width="1.6"/><circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.min(w,h)/5}" fill="#8a6a4a"/>`; break;
+    case 'car': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w*0.18}" fill="#c9d3da" stroke="#221F1B" stroke-width="1.8"/><rect x="${x+w*0.12}" y="${y+h*0.12}" width="${w*0.76}" height="${h*0.22}" fill="#7fa0b5"/>`; break;
   }
   let s = rotWrap(o, inner);
-  s += `<text x="${wx(o.x+o.w/2)}" y="${wy(o.y+o.h)+11}" text-anchor="middle" font-size="9" fill="#5B6B72">${DEFAULTS[o.subtype].label}</text>`;
+  s += `<text x="${wx(o.x+o.w/2)}" y="${wy(o.y+o.h)+11}" text-anchor="middle" font-size="9.5" fill="#6E675C">${DEFAULTS[o.subtype].label}</text>`;
   if (sel) s += selOutline(o) + handles(o);
   return s;
 }
@@ -448,21 +458,21 @@ function drawFurniture(o, sel){
 function drawPoint(o, sel, palette){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
   const c = palette[o.subtype];
-  let inner = `<circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.max(w,h)/2}" fill="${c.fill}" stroke="#2B3A42" stroke-width="1.6"/>
-    <text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" font-size="10" font-weight="700" fill="#2B3A42">${c.tag}</text>`;
+  let inner = `<circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.max(w,h)/2}" fill="${c.fill}" stroke="#221F1B" stroke-width="1.6"/>
+    <text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#221F1B">${c.tag}</text>`;
   let s = `<g data-id="${o.id}">${inner}</g>`;
   if (sel) s += selOutline(o);
   return s;
 }
-const ELEC_PALETTE = { switch:{fill:'#f5c451',tag:'S'}, outlet:{fill:'#f59e42',tag:'P'}, light:{fill:'#ffe08a',tag:'L'} };
-const PLUMB_PALETTE = { supply:{fill:'#7fb3d5',tag:'น'}, drain:{fill:'#5fa8a0',tag:'ระ'}, heater:{fill:'#e08a52',tag:'ทน'}, septic:{fill:'#a9825f',tag:'ถ'} };
+const ELEC_PALETTE = { switch:{fill:'#E3B94F',tag:'S'}, outlet:{fill:'#D98A4B',tag:'P'}, light:{fill:'#F0D889',tag:'L'} };
+const PLUMB_PALETTE = { supply:{fill:'#7FA8C4',tag:'น'}, drain:{fill:'#5F9891',tag:'ระ'}, heater:{fill:'#C57D52',tag:'ทน'}, septic:{fill:'#A08262',tag:'ถ'} };
 
 function drawConnector(o, arr, sel, color){
   const from = arr.find(p=>p.id===o.fromId), to = arr.find(p=>p.id===o.toId);
   if (!from || !to) return '';
   const x1=wx(from.x+from.w/2), y1=wy(from.y+from.h/2), x2=wx(to.x+to.w/2), y2=wy(to.y+to.h/2);
   let s = `<g data-id="${o.id}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="3" stroke-dasharray="7 4"/></g>`;
-  if (sel) s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#D6349B" stroke-width="6" opacity="0.3"/>`;
+  if (sel) s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${cssVar('--accent')}" stroke-width="6" opacity="0.3"/>`;
   return s;
 }
 
@@ -472,10 +482,10 @@ function renderCanvas(){
   if (state.view==='elevation3d'){ renderElevation3D(); return; }
   const W=state.width, D=state.depth;
   const pxW = px(W)+MARGIN.left+MARGIN.right, pxH = px(D)+MARGIN.top+MARGIN.bottom;
-  let s = svgOpen(pxW,pxH);
-  s += `<rect x="0" y="0" width="${pxW}" height="${pxH}" fill="#FBF9F3"/>`;
-  s += `<rect x="${MARGIN.left}" y="${MARGIN.top}" width="${px(W)}" height="${px(D)}" fill="none" stroke="#c9c0a6" stroke-width="1.5" stroke-dasharray="5 4"/>`;
-  s += `<text x="${MARGIN.left+px(W)/2}" y="${MARGIN.top-10}" text-anchor="middle" font-size="16" fill="#D6349B" font-family="Caveat,cursive">${W.toFixed(1)} ม.</text>`;
+  let s = svgOpenViewBox(pxW,pxH);
+  s += `<rect x="${(viewport.x-2000).toFixed(1)}" y="${(viewport.y-2000).toFixed(1)}" width="4000" height="4000" fill="#FBF9F4"/>`;
+  s += `<rect x="${MARGIN.left}" y="${MARGIN.top}" width="${px(W)}" height="${px(D)}" fill="none" stroke="#CDC5B2" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  s += `<text x="${MARGIN.left+px(W)/2}" y="${MARGIN.top-10}" text-anchor="middle" font-size="17" fill="${cssVar('--accent')}" font-family="Caveat,cursive">${W.toFixed(1)} ม.</text>`;
 
   const f = curFloor();
   if (state.view==='plan2d'){
@@ -488,27 +498,27 @@ function renderCanvas(){
     });
     if (previewRoom){
       const x=wx(previewRoom.x), y=wy(previewRoom.y), w=px(previewRoom.w), h=px(previewRoom.h);
-      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(214,52,155,0.08)" stroke="#D6349B" stroke-width="2" stroke-dasharray="6 4"/>`;
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(124,48,72,0.08)" stroke="${cssVar('--accent')}" stroke-width="2" stroke-dasharray="6 4"/>`;
     }
   } else if (state.view==='electrical'){
     f.objects.filter(o=>o.kind==='room').forEach(o=>s+=drawRoomBackdrop(o));
-    f.electrical.filter(o=>o.kind==='wire').forEach(o=>s+=drawConnector(o, f.electrical, o.id===selectedId, '#e8a13a'));
+    f.electrical.filter(o=>o.kind==='wire').forEach(o=>s+=drawConnector(o, f.electrical, o.id===selectedId, '#D98A4B'));
     f.electrical.filter(o=>o.kind==='elecPoint').forEach(o=>s+=drawPoint(o,o.id===selectedId,ELEC_PALETTE));
   } else if (state.view==='plumbing'){
     f.objects.filter(o=>o.kind==='room').forEach(o=>s+=drawRoomBackdrop(o));
-    f.plumbing.filter(o=>o.kind==='pipe').forEach(o=>s+=drawConnector(o, f.plumbing, o.id===selectedId, '#4a90c4'));
+    f.plumbing.filter(o=>o.kind==='pipe').forEach(o=>s+=drawConnector(o, f.plumbing, o.id===selectedId, '#4A7FA8'));
     f.plumbing.filter(o=>o.kind==='plumbPoint').forEach(o=>s+=drawPoint(o,o.id===selectedId,PLUMB_PALETTE));
   }
   s += `</svg>`;
   els.canvasWrap.innerHTML = s;
 }
 
-/* ---------------- 3D exterior (pure math projection, no CSS 3D) ---------------- */
+/* ---------------- 3D exterior (pure math projection) ---------------- */
 function project(x,y,z){
   const cx = x*Math.cos(theta) - z*Math.sin(theta);
   const cz = x*Math.sin(theta) + z*Math.cos(theta);
-  const sx = (cx - cz) * Math.cos(phi);
-  const sy = (cx + cz) * Math.sin(phi) - y;
+  const sx = (cx - cz) * Math.cos(phi) * projScale;
+  const sy = ((cx + cz) * Math.sin(phi) - y) * projScale;
   return { sx, sy, depth: cx+cz };
 }
 function shade(hex, amt){
@@ -518,53 +528,48 @@ function shade(hex, amt){
   return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
 }
 function poly(pts, fill){
-  return `<polygon points="${pts.map(p=>`${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')}" fill="${fill}" stroke="#2B3A42" stroke-width="1"/>`;
+  return `<polygon points="${pts.map(p=>`${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')}" fill="${fill}" stroke="#221F1B" stroke-width="1"/>`;
 }
 
 function renderElevation3D(){
+  projScale = 30*zoom3d;
   const W=state.width, D=state.depth, H=state.floors*FLOOR_H;
   const hw=W/2, hd=D/2;
   const color = state.houseColor;
-  const roofColor = '#3A4750';
+  const roofColor = '#3A3530';
 
   const P = (x,y,z)=>project(x,y,z);
-  const items = []; // {depth, svg}
+  const items = [];
 
-  // ground plane (drawn first, unconditionally)
   const gsize = Math.max(W,D)*1.8, gh=gsize/2;
   const gCorners = [P(-gh,0,-gh),P(gh,0,-gh),P(gh,0,gh),P(-gh,0,gh)];
-  let groundSvg = poly(gCorners, '#E4EEDD');
+  let groundSvg = poly(gCorners, '#E6EADD');
 
-  // house 8 corners
   const b_fl=P(-hw,0,hd), b_fr=P(hw,0,hd), b_bl=P(-hw,0,-hd), b_br=P(hw,0,-hd);
   const t_fl=P(-hw,H,hd), t_fr=P(hw,H,hd), t_bl=P(-hw,H,-hd), t_br=P(hw,H,-hd);
 
   const faces = [
-    { name:'front', pts:[b_fl,b_fr,t_fr,t_fl], shade:0.05 },
-    { name:'back', pts:[b_br,b_bl,t_bl,t_br], shade:-0.18 },
-    { name:'left', pts:[b_bl,b_fl,t_fl,t_bl], shade:-0.08 },
-    { name:'right', pts:[b_fr,b_br,t_br,t_fr], shade:-0.02 },
+    { pts:[b_fl,b_fr,t_fr,t_fl], shade:0.05 },
+    { pts:[b_br,b_bl,t_bl,t_br], shade:-0.18 },
+    { pts:[b_bl,b_fl,t_fl,t_bl], shade:-0.08 },
+    { pts:[b_fr,b_br,t_br,t_fr], shade:-0.02 },
   ];
   faces.forEach(fc=>{
-    const avg = { depth: (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth+fc.pts[3].depth)/4 };
-    items.push({ depth: avg.depth, svg: poly(fc.pts, shade(color, fc.shade)) });
+    const avg = (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth+fc.pts[3].depth)/4;
+    items.push({ depth: avg, svg: poly(fc.pts, shade(color, fc.shade)) });
   });
 
-  // roof (simple 4-triangle pyramid)
   const roofH = 1.3;
   const apex = P(0, H+roofH, 0);
   const roofFaces = [
-    { pts:[t_fl,t_fr,apex], shade:0.08 },
-    { pts:[t_fr,t_br,apex], shade:-0.05 },
-    { pts:[t_br,t_bl,apex], shade:-0.16 },
-    { pts:[t_bl,t_fl,apex], shade:-0.09 },
+    { pts:[t_fl,t_fr,apex], shade:0.08 }, { pts:[t_fr,t_br,apex], shade:-0.05 },
+    { pts:[t_br,t_bl,apex], shade:-0.16 }, { pts:[t_bl,t_fl,apex], shade:-0.09 },
   ];
   roofFaces.forEach(fc=>{
     const avg = (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth)/3;
     items.push({ depth:avg, svg: poly(fc.pts, shade(roofColor, fc.shade)) });
   });
 
-  // windows + door on FRONT face (approximate, auto-generated per floor)
   for (let fl=0; fl<state.floors; fl++){
     const floorObjs = (floorsData[fl] && floorsData[fl].objects) || [];
     const bedCount = Math.max(1, floorObjs.filter(o=>o.kind==='room' && o.type==='bedroom').length);
@@ -575,36 +580,34 @@ function renderElevation3D(){
       const wx0 = -W/2 + 0.5 + usable*(i/(winCount+1)) - 0.4;
       const p1=P(wx0,yBase+1.1,hd), p2=P(wx0+0.8,yBase+1.1,hd), p3=P(wx0+0.8,yBase+2.0,hd), p4=P(wx0,yBase+2.0,hd);
       const avg=(p1.depth+p2.depth+p3.depth+p4.depth)/4 + 0.02;
-      items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#BFDCE8') });
+      items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#B9C9CE') });
     }
   }
   {
     const dw=0.9, dh=2.0;
     const p1=P(-dw/2,0,hd), p2=P(dw/2,0,hd), p3=P(dw/2,dh,hd), p4=P(-dw/2,dh,hd);
     const avg=(p1.depth+p2.depth+p3.depth+p4.depth)/4 + 0.03;
-    items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#6B4226') });
+    items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#5C4536') });
   }
 
-  // trees & cars from ground floor (floor 0) plan objects
   const groundObjs = (floorsData[0] && floorsData[0].objects) || [];
   groundObjs.filter(o=>o.kind==='furniture' && (o.subtype==='tree'||o.subtype==='car')).forEach(o=>{
     const worldX = (o.x+o.w/2) - W/2, worldZ = (o.y+o.h/2) - D/2;
     const base = P(worldX,0,worldZ);
     const isTree = o.subtype==='tree';
-    const iw = isTree?30:40, ih = isTree?42:22;
+    const iw = (isTree?30:40)*zoom3d, ih = (isTree?42:22)*zoom3d;
     let svg;
     if (isTree){
       svg = `<line x1="${base.sx}" y1="${base.sy}" x2="${base.sx}" y2="${base.sy-ih*0.35}" stroke="#8a6a4a" stroke-width="3"/>
-             <circle cx="${base.sx}" cy="${base.sy-ih*0.6}" r="${iw/2}" fill="#8fbf7a" stroke="#5b8a4a" stroke-width="1.5"/>`;
+             <circle cx="${base.sx}" cy="${base.sy-ih*0.6}" r="${iw/2}" fill="#8FA678" stroke="#5b7a4a" stroke-width="1.5"/>`;
     } else {
-      svg = `<rect x="${base.sx-iw/2}" y="${base.sy-ih}" width="${iw}" height="${ih}" rx="5" fill="#c9d3da" stroke="#2B3A42" stroke-width="1.4"/>`;
+      svg = `<rect x="${base.sx-iw/2}" y="${base.sy-ih}" width="${iw}" height="${ih}" rx="5" fill="#c9d3da" stroke="#221F1B" stroke-width="1.4"/>`;
     }
     items.push({ depth: base.depth+0.05, svg });
   });
 
   items.sort((a,b)=>a.depth-b.depth);
 
-  // dynamic viewBox from all projected points
   const allPts = [b_fl,b_fr,b_bl,b_br,t_fl,t_fr,t_bl,t_br,apex,...gCorners];
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   allPts.forEach(p=>{ minX=Math.min(minX,p.sx); maxX=Math.max(maxX,p.sx); minY=Math.min(minY,p.sy); maxY=Math.max(maxY,p.sy); });
@@ -612,7 +615,7 @@ function renderElevation3D(){
   const vbX=minX-pad, vbY=minY-pad, vbW=(maxX-minX)+pad*2, vbH=(maxY-minY)+pad*2;
 
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}" width="${Math.round(vbW)}" height="${Math.round(vbH)}">`;
-  s += `<rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#EAF2F6"/>`;
+  s += `<rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#EDF1EC"/>`;
   s += groundSvg;
   items.forEach(it=>s+=it.svg);
   s += `</svg>`;
@@ -620,7 +623,7 @@ function renderElevation3D(){
   updateHint();
 }
 
-/* ---------------- interaction: pointer handling ---------------- */
+/* ---------------- coordinate helpers ---------------- */
 function toMeters(evt){
   const svg = els.canvasWrap.querySelector('svg');
   if (!svg) return {x:0,y:0};
@@ -629,7 +632,17 @@ function toMeters(evt){
   const p = pt.matrixTransform(svg.getScreenCTM().inverse());
   return { x:(p.x-MARGIN.left)/SCALE, y:(p.y-MARGIN.top)/SCALE };
 }
+function toInternalPx(evt){
+  const svg = els.canvasWrap.querySelector('svg');
+  if (!svg) return {x:0,y:0};
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX; pt.y = evt.clientY;
+  const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+  return { x:p.x, y:p.y };
+}
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
 
+/* ---------------- hit testing ---------------- */
 function hitTestHandle(pt){
   if (!selectedId || state.view!=='plan2d') return null;
   const o = findObj(selectedId);
@@ -676,11 +689,20 @@ function anchorFor(handle, room){
   return { x: room.x, y: room.y };
 }
 
+/* ---------------- pointer interaction (drag / pan / pinch-zoom) ---------------- */
 function onCanvasDown(e){
-  if (state.view==='elevation3d'){
-    dragging3d=true; lastX=e.clientX; lastY=e.clientY;
+  activePointers.set(e.pointerId, {x:e.clientX,y:e.clientY});
+  try { els.canvasWrap.setPointerCapture(e.pointerId); } catch(err){}
+
+  if (activePointers.size>=2){
+    const pts=[...activePointers.values()].slice(0,2);
+    pinch = { startDist: dist(pts[0],pts[1]), startZoom: state.view==='elevation3d'?zoom3d:viewport.zoom };
+    movingId=null; resizing=null; drawingRoom=null; previewRoom=null; panning=false; dragging3d=false;
     return;
   }
+
+  if (state.view==='elevation3d'){ dragging3d=true; lastX=e.clientX; lastY=e.clientY; return; }
+
   const pt = toMeters(e);
   const hHit = hitTestHandle(pt);
   if (hHit){ resizing = { room:hHit.room, anchor: anchorFor(hHit.handle, hHit.room) }; e.preventDefault(); return; }
@@ -727,11 +749,31 @@ function onCanvasDown(e){
     const obj = { id:'o'+(uid++), kind, subtype:currentSubtype, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
     activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
   } else {
-    selectedId = null; closeSheet(); renderCanvas();
+    panning = true; panMoved = false; lastInternal = toInternalPx(e);
   }
 }
 
 function onCanvasMove(e){
+  if (activePointers.has(e.pointerId)) activePointers.set(e.pointerId, {x:e.clientX,y:e.clientY});
+
+  if (pinch && activePointers.size>=2){
+    const pts=[...activePointers.values()].slice(0,2);
+    const newDist = dist(pts[0],pts[1]);
+    const mid = {clientX:(pts[0].x+pts[1].x)/2, clientY:(pts[0].y+pts[1].y)/2};
+    if (state.view==='elevation3d'){
+      zoom3d = clamp(pinch.startZoom*(newDist/pinch.startDist), 0.4, 3);
+      renderElevation3D();
+    } else {
+      const before = toInternalPx(mid);
+      viewport.zoom = clamp(pinch.startZoom*(newDist/pinch.startDist), 0.4, 4);
+      renderCanvas();
+      const after = toInternalPx(mid);
+      viewport.x -= (after.x-before.x); viewport.y -= (after.y-before.y);
+      renderCanvas();
+    }
+    return;
+  }
+
   if (state.view==='elevation3d'){
     if (!dragging3d) return;
     const dx=e.clientX-lastX, dy=e.clientY-lastY;
@@ -741,6 +783,17 @@ function onCanvasMove(e){
     renderElevation3D();
     return;
   }
+
+  if (panning){
+    const cur = toInternalPx(e);
+    const dx = cur.x-lastInternal.x, dy = cur.y-lastInternal.y;
+    if (Math.abs(dx)+Math.abs(dy) > 0.6) panMoved = true;
+    viewport.x -= dx; viewport.y -= dy;
+    renderCanvas();
+    lastInternal = toInternalPx(e);
+    return;
+  }
+
   if (movingId){
     const pt = toMeters(e);
     const o = findObj(movingId);
@@ -768,8 +821,17 @@ function onCanvasMove(e){
   }
 }
 
-function onCanvasUp(){
+function onCanvasUp(e){
+  activePointers.delete(e.pointerId);
+  if (activePointers.size<2) pinch = null;
   dragging3d = false;
+
+  if (panning){
+    if (!panMoved){ selectedId=null; closeSheet(); }
+    panning=false; renderCanvas();
+    return;
+  }
+
   if (drawingRoom && previewRoom){
     const w=Math.max(0.9,previewRoom.w), h=Math.max(0.9,previewRoom.h);
     const obj = { id:'o'+(uid++), kind:'room', x:previewRoom.x, y:previewRoom.y, w, h, type:'other', label:ROOM_LABEL['other'] };
@@ -782,6 +844,22 @@ function onCanvasUp(){
 els.canvasWrap.addEventListener('pointerdown', onCanvasDown);
 els.canvasWrap.addEventListener('pointermove', onCanvasMove);
 window.addEventListener('pointerup', onCanvasUp);
+window.addEventListener('pointercancel', onCanvasUp);
+
+els.canvasWrap.addEventListener('wheel', e=>{
+  e.preventDefault();
+  if (state.view==='elevation3d'){
+    zoom3d = clamp(zoom3d*(e.deltaY<0?1.1:0.9), 0.4, 3);
+    renderElevation3D();
+    return;
+  }
+  const before = toInternalPx(e);
+  viewport.zoom = clamp(viewport.zoom*(e.deltaY<0?1.1:0.9), 0.4, 4);
+  renderCanvas();
+  const after = toInternalPx(e);
+  viewport.x -= (after.x-before.x); viewport.y -= (after.y-before.y);
+  renderCanvas();
+}, {passive:false});
 
 document.addEventListener('keydown', e=>{
   if ((e.key==='Delete'||e.key==='Backspace') && selectedId){
@@ -790,6 +868,29 @@ document.addEventListener('keydown', e=>{
     deleteSelected();
   }
 });
+
+/* ---------------- zoom buttons ---------------- */
+function zoomBy(factor){
+  if (state.view==='elevation3d'){ zoom3d=clamp(zoom3d*factor,0.4,3); renderElevation3D(); return; }
+  const svg = els.canvasWrap.querySelector('svg');
+  if (!svg) return;
+  const vb = svg.viewBox.baseVal;
+  const cx = vb.x+vb.width/2, cy = vb.y+vb.height/2;
+  viewport.zoom = clamp(viewport.zoom*factor,0.4,4);
+  renderCanvas();
+  const svg2 = els.canvasWrap.querySelector('svg');
+  const vb2 = svg2.viewBox.baseVal;
+  viewport.x = cx - vb2.width/2;
+  viewport.y = cy - vb2.height/2;
+  renderCanvas();
+}
+function resetZoom(){
+  if (state.view==='elevation3d'){ zoom3d=1; theta=Math.PI/4; phi=0.6; renderElevation3D(); return; }
+  viewport.x=0; viewport.y=0; viewport.zoom=1; renderCanvas();
+}
+document.getElementById('zoomIn').onclick=()=>zoomBy(1.25);
+document.getElementById('zoomOut').onclick=()=>zoomBy(0.8);
+document.getElementById('zoomReset').onclick=resetZoom;
 
 /* ---------------- top-level controls ---------------- */
 els.widthInput.addEventListener('input', e=>{ state.width=clamp(parseFloat(e.target.value)||8,3,30); renderCanvas(); });
@@ -814,7 +915,7 @@ document.getElementById('downloadBtn').onclick = ()=>{
     canvas.width = svgEl.viewBox.baseVal.width*factor;
     canvas.height = svgEl.viewBox.baseVal.height*factor;
     const ctx=canvas.getContext('2d');
-    ctx.fillStyle='#FBF9F3'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#FBF9F4'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
     URL.revokeObjectURL(url);
     canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`${state.view}-ชั้น${state.activeFloor+1}.png`; a.click(); });
