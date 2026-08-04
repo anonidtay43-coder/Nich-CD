@@ -2,451 +2,673 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เครื่องมือลากวาดผังบ้านเอง</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>สตูดิโอวางผังบ้าน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F5F1E6; --paper-line:#e6ddc8;
     --ink:#2B3A42; --ink-soft:#5B6B72;
-    --accent:#D6349B; --accent-soft:#f3d9ea;
-    --card:#ffffff;
-    --shadow: 0 1px 2px rgba(43,58,66,0.06), 0 8px 24px rgba(43,58,66,0.08);
+    --accent:#D6349B; --card:#ffffff;
+    --shadow: 0 1px 2px rgba(43,58,66,.06), 0 6px 18px rgba(43,58,66,.08);
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
   body{
-    margin:0; font-family:'Sarabun', sans-serif; color:var(--ink);
-    background:
-      linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/100% 28px,
-      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0/28px 100%,
-      var(--paper);
-    min-height:100vh;
+    font-family:'Sarabun',sans-serif; color:var(--ink); background:var(--paper);
+    display:flex; justify-content:center;
   }
-  header{padding:24px 32px 12px;}
-  header .eyebrow{font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600;}
-  header h1{margin:6px 0 4px; font-size:clamp(20px,3vw,27px); font-weight:700;}
-  header p{margin:0; color:var(--ink-soft); font-size:14px; max-width:680px;}
+  .app-frame{
+    width:100%; max-width:480px; min-height:100vh;
+    display:flex; flex-direction:column;
+    background:var(--paper);
+    position:relative;
+  }
+  header{padding:14px 16px 6px;}
+  header .eyebrow{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); font-weight:600;}
+  header h1{margin:4px 0; font-size:19px; font-weight:700;}
 
-  .app{display:grid; grid-template-columns: 300px 1fr; gap:22px; padding:8px 32px 40px; align-items:start;}
-  @media (max-width: 900px){ .app{grid-template-columns: 1fr;} }
+  .viewtabs{display:flex; gap:6px; padding:8px 12px; overflow-x:auto;}
+  .viewtab{
+    flex:none; padding:8px 12px; border-radius:20px; font-size:12.5px; font-weight:600;
+    background:var(--card); border:1px solid var(--paper-line); color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+  }
+  .viewtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
-  .panel{background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:18px;}
-  .panel h2{font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin:0 0 12px; font-weight:600;}
-  .field{margin-bottom:14px;}
-  .field label{display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom:5px;}
-  .field label .val{font-family:'JetBrains Mono', monospace; color:var(--accent); font-weight:600;}
-  input[type=range]{width:100%; accent-color:var(--accent);}
-  .row2{display:flex; gap:10px;}
-  .row2 .field{flex:1;}
-  .divider{height:1px; background:var(--paper-line); margin:14px 0;}
+  .settings-toggle{
+    margin:0 12px 8px; padding:8px 12px; border-radius:10px; background:var(--card);
+    border:1px solid var(--paper-line); font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+  }
+  .settings-panel{
+    margin:0 12px 8px; padding:12px; border-radius:10px; background:var(--card); box-shadow:var(--shadow);
+    display:none; gap:8px;
+  }
+  .settings-panel.open{display:grid; grid-template-columns:1fr 1fr 1fr;}
+  .settings-panel .field label{display:block; font-size:11.5px; color:var(--ink-soft); margin-bottom:3px;}
+  .settings-panel input[type=number]{
+    width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--paper-line);
+    border-radius:6px; padding:6px 4px; font-size:13px; text-align:center;
+  }
 
-  .tool-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .floortabs{display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; align-items:center;}
+  .tab{padding:6px 12px; border-radius:16px; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--paper-line); background:var(--card); color:var(--ink-soft); flex:none;}
+  .tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .tab-icon-btn{flex:none; width:26px; height:26px; border-radius:50%; border:1px dashed var(--paper-line); background:#fff; cursor:pointer; font-size:14px; color:var(--ink-soft); line-height:1;}
+
+  .toolbar{display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto;}
   .tool-btn{
-    display:flex; align-items:center; gap:6px;
-    padding:8px 8px; border-radius:8px; border:1px solid var(--paper-line);
-    background:var(--paper); cursor:pointer; font-size:12.5px; font-weight:500; color:var(--ink);
-    font-family:'Sarabun', sans-serif;
+    flex:none; display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:7px 9px; border-radius:10px; border:1px solid var(--paper-line); background:var(--card);
+    cursor:pointer; font-size:10.5px; font-weight:500; color:var(--ink); min-width:52px;
   }
-  .tool-btn svg{flex:none;}
   .tool-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
-  .tool-btn.wide{grid-column:1/3;}
 
-  .props{background:var(--paper); border-radius:10px; padding:14px; font-size:13.5px;}
-  .props .empty{color:var(--ink-soft); font-size:13px; line-height:1.6;}
-  .props input[type=text]{
-    width:100%; font-family:'Sarabun',sans-serif; border:1px solid var(--paper-line);
-    border-radius:6px; padding:6px 8px; font-size:13.5px; margin-top:4px;
+  .canvas-card{
+    margin:0 12px 10px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+    overflow:hidden; flex:1; display:flex; flex-direction:column;
   }
-  .props select{
-    width:100%; border:1px solid var(--paper-line); border-radius:6px; padding:6px 8px;
-    font-family:'Sarabun',sans-serif; font-size:13.5px; margin-top:4px; background:#fff;
+  .canvas-wrap{flex:1; display:flex; justify-content:center; align-items:center; padding:10px; touch-action:none; min-height:340px;}
+  .canvas-wrap svg{max-width:100%; height:auto; user-select:none;}
+  .canvas-hint{font-size:11px; color:var(--ink-soft); text-align:center; padding:0 12px 10px;}
+
+  .foot-actions{display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-top:1px solid var(--paper-line); gap:8px;}
+  .icon-btn{background:transparent; border:1px solid var(--paper-line); color:var(--ink-soft); padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;}
+  .download-btn{background:var(--accent); color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; font-size:12.5px; cursor:pointer;}
+
+  .sheet-backdrop{position:fixed; inset:0; background:rgba(43,58,66,.35); z-index:20; display:none;}
+  .sheet-backdrop.open{display:block;}
+  .sheet{
+    position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:100%; max-width:480px;
+    background:#fff; border-radius:16px 16px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,.18);
+    padding:16px; z-index:21; transition:transform .2s ease; max-height:70vh; overflow-y:auto;
   }
-  .props .btn-row{display:flex; gap:8px; margin-top:12px;}
-  .props button{
-    flex:1; border:none; border-radius:8px; padding:8px 10px; font-weight:600; font-size:13px; cursor:pointer;
-    font-family:'Sarabun',sans-serif;
-  }
-  .btn-rotate{background:#fff; border:1px solid var(--paper-line) !important; color:var(--ink);}
+  .sheet.closed{transform:translateX(-50%) translateY(100%);}
+  .sheet-handle{width:36px; height:4px; background:var(--paper-line); border-radius:2px; margin:0 auto 12px;}
+  .sheet h3{margin:0 0 10px; font-size:14.5px;}
+  .sheet input[type=text]{width:100%; border:1px solid var(--paper-line); border-radius:8px; padding:8px 10px; font-size:14px; font-family:'Sarabun',sans-serif;}
+  .sheet select{width:100%; border:1px solid var(--paper-line); border-radius:8px; padding:8px 10px; font-size:14px; font-family:'Sarabun',sans-serif; background:#fff;}
+  .num-row{display:flex; gap:8px; margin-top:8px;}
+  .num-field{flex:1;}
+  .num-field label{font-size:11.5px; color:var(--ink-soft); display:block; margin-bottom:3px;}
+  .num-field input{width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--paper-line); border-radius:8px; padding:7px 6px; font-size:13.5px; text-align:center;}
+  .sheet .btn-row{display:flex; gap:8px; margin-top:14px;}
+  .sheet button.act{flex:1; border:none; border-radius:10px; padding:10px; font-weight:600; font-size:13px; cursor:pointer;}
+  .btn-rotate{background:var(--paper); border:1px solid var(--paper-line) !important; color:var(--ink);}
   .btn-delete{background:#c1435c; color:#fff;}
-
-  .preview{background:var(--card); border-radius:14px; box-shadow:var(--shadow); overflow:hidden;}
-  .preview-head{display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--paper-line); gap:12px; flex-wrap:wrap;}
-  .tabs{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
-  .tab{padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);}
-  .tab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
-  .tab-icon-btn{width:26px; height:26px; border-radius:50%; border:1px dashed var(--paper-line); background:#fff; cursor:pointer; font-size:14px; color:var(--ink-soft); line-height:1;}
-  .canvas-wrap{padding:18px; display:flex; justify-content:center; align-items:center; min-height:460px; touch-action:none;}
-  .canvas-wrap svg{max-width:100%; height:auto; cursor:crosshair; user-select:none;}
-  .foot-actions{display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-top:1px solid var(--paper-line); font-size:12.5px; color:var(--ink-soft); gap:12px; flex-wrap:wrap;}
-  .download-btn{background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-family:'Sarabun',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;}
-  .clear-btn{background:transparent; border:1px solid var(--paper-line); color:var(--ink-soft); padding:8px 14px; border-radius:8px; font-family:'Sarabun',sans-serif; font-weight:600; font-size:13px; cursor:pointer;}
+  .sheet .field-label{font-size:11.5px; color:var(--ink-soft); margin-top:10px; display:block;}
 </style>
 </head>
 <body>
+<div class="app-frame">
+  <header>
+    <div class="eyebrow">Freehand House Studio</div>
+    <h1>สตูดิโอวางผังบ้าน</h1>
+  </header>
 
-<header>
-  <div class="eyebrow">Freehand Plan Editor</div>
-  <h1>ลากวาดผังบ้านเอง</h1>
-  <p>เลือกเครื่องมือ แล้วลากวาดห้อง หรือคลิกเพื่อวางประตู หน้าต่าง แอร์ และเฟอร์นิเจอร์ตามตำแหน่งที่ต้องการ คลิกวัตถุใดๆ เพื่อย้าย/แก้ไข/ลบได้ตลอดเวลา</p>
-</header>
+  <div class="viewtabs" id="viewTabs"></div>
 
-<div class="app">
-  <div class="panel">
-    <h2>ขนาดที่ดิน/ตัวบ้าน</h2>
-    <div class="row2">
-      <div class="field"><label>กว้าง (ม.) <span class="val" id="widthVal">8.0</span></label><input type="range" id="width" min="5" max="20" step="0.5" value="8"></div>
-      <div class="field"><label>ลึก (ม.) <span class="val" id="depthVal">9.5</span></label><input type="range" id="depth" min="5" max="20" step="0.5" value="9.5"></div>
-    </div>
-    <div class="divider"></div>
-
-    <h2>เครื่องมือ</h2>
-    <div class="tool-grid" id="toolGrid"></div>
-    <div class="divider"></div>
-
-    <h2>คุณสมบัติที่เลือก</h2>
-    <div class="props" id="props"><div class="empty">ยังไม่ได้เลือกวัตถุ — คลิกเครื่องมือด้านบนแล้วลาก/คลิกบนผังเพื่อวาง</div></div>
+  <div class="settings-toggle" id="settingsToggle"><span>⚙️ ขนาดที่ดิน / จำนวนชั้น</span><span id="settingsChevron">▾</span></div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="field"><label>กว้าง (ม.)</label><input type="number" id="widthInput" min="3" max="30" step="0.1" value="8"></div>
+    <div class="field"><label>ลึก (ม.)</label><input type="number" id="depthInput" min="3" max="30" step="0.1" value="9.5"></div>
+    <div class="field"><label>จำนวนชั้น</label><input type="number" id="floorsInput" min="1" max="4" step="1" value="1"></div>
   </div>
 
-  <div class="preview">
-    <div class="preview-head">
-      <div class="tabs" id="floorTabs"></div>
-      <button class="clear-btn" id="clearFloorBtn">ล้างชั้นนี้</button>
-    </div>
+  <div class="floortabs" id="floorTabs"></div>
+  <div class="toolbar" id="toolbar"></div>
+
+  <div class="canvas-card">
     <div class="canvas-wrap" id="canvasWrap"></div>
-    <div class="foot-actions">
-      <span>กริดล็อก 0.25 ม. · คลิก Delete บนคีย์บอร์ดเพื่อลบวัตถุที่เลือก</span>
-      <button class="download-btn" id="downloadBtn">บันทึกภาพ PNG</button>
-    </div>
+  </div>
+  <div class="canvas-hint" id="canvasHint"></div>
+
+  <div class="foot-actions">
+    <button class="icon-btn" id="clearBtn">ล้างชั้นนี้</button>
+    <button class="download-btn" id="downloadBtn">บันทึกภาพ PNG</button>
   </div>
 </div>
 
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet closed" id="propSheet">
+  <div class="sheet-handle"></div>
+  <div id="propBody"></div>
+</div>
+
 <script>
-const SCALE = 46;
-const GRID = 0.25;
-const MARGIN = { top: 40, right: 40, bottom: 40, left: 40 };
+/* ---------------- constants & state ---------------- */
+const SCALE = 34;
+const GRID = 0.1;
+const MARGIN = { top:34, right:34, bottom:34, left:34 };
+const FLOOR_H = 3;
 let uid = 1;
 
-const state = { width: 8, depth: 9.5, activeFloor: 0 };
-let floorsData = [ { objects: [] } ];
+const state = { width:8, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D8C7A6' };
+let floorsData = [ mkFloor() ];
+function mkFloor(){ return { objects:[], electrical:[], plumbing:[] }; }
 
 let currentTool = 'select';
-let currentFurniture = null;
+let currentSubtype = null;
 let selectedId = null;
+let wireStart = null;
 
-let movingId = null, dragOffset = null;
-let resizing = null; // { anchor:{x,y} }
-let drawingRoom = null; // { startX, startY }
-let previewRoom = null;
+let movingId=null, dragOffset=null, resizing=null, drawingRoom=null, previewRoom=null;
+
+let theta = Math.PI/4, phi = 0.6, dragging3d=false, lastX=0, lastY=0;
 
 const ROOM_TYPES = [
-  { key:'bedroom', label:'ห้องนอน', color:'#F4EADA' },
-  { key:'bathroom', label:'ห้องน้ำ', color:'#E2EDF4' },
-  { key:'kitchen', label:'ห้องครัว', color:'#E6EFE8' },
-  { key:'living', label:'ห้องรับแขก', color:'#ECE6F4' },
-  { key:'office', label:'ห้องทำงาน', color:'#FBEAE0' },
-  { key:'balcony', label:'ระเบียง', color:'#E8F3E3' },
-  { key:'garage', label:'ที่จอดรถ', color:'#EDEDED' },
-  { key:'other', label:'พื้นที่อื่นๆ', color:'#F0EFEC' },
+  {key:'bedroom',label:'ห้องนอน',color:'#F4EADA'}, {key:'bathroom',label:'ห้องน้ำ',color:'#E2EDF4'},
+  {key:'kitchen',label:'ห้องครัว',color:'#E6EFE8'}, {key:'living',label:'ห้องรับแขก',color:'#ECE6F4'},
+  {key:'office',label:'ห้องทำงาน',color:'#FBEAE0'}, {key:'balcony',label:'ระเบียง',color:'#E8F3E3'},
+  {key:'garage',label:'ที่จอดรถ',color:'#EDEDED'}, {key:'other',label:'พื้นที่อื่นๆ',color:'#F0EFEC'},
 ];
-const ROOM_COLOR = {}; const ROOM_LABEL = {};
-ROOM_TYPES.forEach(t => { ROOM_COLOR[t.key]=t.color; ROOM_LABEL[t.key]=t.label; });
+const ROOM_COLOR={}, ROOM_LABEL={}; ROOM_TYPES.forEach(t=>{ROOM_COLOR[t.key]=t.color; ROOM_LABEL[t.key]=t.label;});
 
-const FURNITURE_TYPES = [
-  { key:'bed', label:'เตียง', w:1.6, h:2.0 },
-  { key:'sofa', label:'โซฟา', w:1.8, h:0.85 },
-  { key:'table', label:'โต๊ะอาหาร', w:1.2, h:0.8 },
-  { key:'wardrobe', label:'ตู้เสื้อผ้า', w:1.2, h:0.6 },
-  { key:'toilet', label:'โถส้วม', w:0.45, h:0.65 },
-  { key:'sink', label:'อ่างล้างหน้า', w:0.55, h:0.45 },
-  { key:'stove', label:'เตา', w:0.6, h:0.6 },
-  { key:'tv', label:'ทีวี', w:1.1, h:0.35 },
-];
-const FURN_DEF = {}; FURNITURE_TYPES.forEach(f => FURN_DEF[f.key]=f);
-
-const DEFAULT_SIZE = {
-  door: { w:0.9, h:0.2 }, window: { w:1.2, h:0.15 }, aircon: { w:0.8, h:0.25 },
+const DEFAULTS = {
+  door:{w:.9,h:.2,min:.2,label:'ประตู'}, window:{w:1.2,h:.15,min:.15,label:'หน้าต่าง'}, aircon:{w:.8,h:.25,min:.2,label:'แอร์'},
+  bed:{w:1.6,h:2.0,min:.3,label:'เตียง'}, sofa:{w:1.8,h:.85,min:.3,label:'โซฟา'}, table:{w:1.2,h:.8,min:.3,label:'โต๊ะอาหาร'},
+  wardrobe:{w:1.2,h:.6,min:.3,label:'ตู้เสื้อผ้า'}, toilet:{w:.45,h:.65,min:.2,label:'โถส้วม'}, sink:{w:.55,h:.45,min:.2,label:'อ่างล้างหน้า'},
+  stove:{w:.6,h:.6,min:.2,label:'เตา'}, tv:{w:1.1,h:.35,min:.2,label:'ทีวี'},
+  tree:{w:1.4,h:1.4,min:.4,label:'ต้นไม้'}, car:{w:1.8,h:4.2,min:.5,label:'รถยนต์'},
+  switch:{w:.25,h:.25,min:.15,label:'สวิตช์ไฟ'}, outlet:{w:.25,h:.25,min:.15,label:'ปลั๊กไฟ'}, light:{w:.3,h:.3,min:.15,label:'โคมไฟ'},
+  supply:{w:.3,h:.3,min:.15,label:'จุดจ่ายน้ำ'}, drain:{w:.3,h:.3,min:.15,label:'ท่อระบาย'}, heater:{w:.5,h:.5,min:.2,label:'เครื่องทำน้ำอุ่น'}, septic:{w:1.0,h:1.4,min:.3,label:'ถังบำบัด'},
 };
 
 const els = {
-  width: document.getElementById('width'), depth: document.getElementById('depth'),
-  widthVal: document.getElementById('widthVal'), depthVal: document.getElementById('depthVal'),
-  toolGrid: document.getElementById('toolGrid'), props: document.getElementById('props'),
-  floorTabs: document.getElementById('floorTabs'), canvasWrap: document.getElementById('canvasWrap'),
+  viewTabs: document.getElementById('viewTabs'), floorTabs: document.getElementById('floorTabs'),
+  toolbar: document.getElementById('toolbar'), canvasWrap: document.getElementById('canvasWrap'),
+  canvasHint: document.getElementById('canvasHint'),
+  propSheet: document.getElementById('propSheet'), propBody: document.getElementById('propBody'), sheetBackdrop: document.getElementById('sheetBackdrop'),
+  widthInput: document.getElementById('widthInput'), depthInput: document.getElementById('depthInput'), floorsInput: document.getElementById('floorsInput'),
+  settingsToggle: document.getElementById('settingsToggle'), settingsPanel: document.getElementById('settingsPanel'), settingsChevron: document.getElementById('settingsChevron'),
 };
 
 function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
 function snap(v){ return Math.round(v/GRID)*GRID; }
 function curFloor(){ return floorsData[state.activeFloor]; }
-function findObj(id){ return curFloor().objects.find(o=>o.id===id) || null; }
+function activeArrayKey(){ return state.view==='electrical' ? 'electrical' : state.view==='plumbing' ? 'plumbing' : 'objects'; }
+function activeArray(){ return curFloor()[activeArrayKey()]; }
+function findObj(id){ return activeArray().find(o=>o.id===id) || null; }
 
-// ---------------- Toolbar ----------------
-function iconSquare(color){ return `<svg width="16" height="16"><rect x="1" y="1" width="14" height="14" rx="2" fill="${color}" stroke="#2B3A42" stroke-width="1.4"/></svg>`; }
-function iconLine(){ return `<svg width="16" height="16"><line x1="2" y1="8" x2="14" y2="8" stroke="#2B3A42" stroke-width="2.5"/></svg>`; }
-function iconWin(){ return `<svg width="16" height="16"><rect x="1" y="6" width="14" height="4" fill="#BFDCE8" stroke="#2B3A42" stroke-width="1.2"/></svg>`; }
-function iconAc(){ return `<svg width="16" height="16"><rect x="1" y="4" width="14" height="6" rx="1.5" fill="#dfe8ea" stroke="#2B3A42" stroke-width="1.2"/></svg>`; }
-function iconSelect(){ return `<svg width="16" height="16"><path d="M3 2 L13 8 L8.5 9 L11 13.5 L9 14.5 L6.5 10 L3 13 Z" fill="#2B3A42"/></svg>`; }
+/* ---------------- floor sync ---------------- */
+function syncFloors(){
+  while (floorsData.length < state.floors) floorsData.push(mkFloor());
+  while (floorsData.length > state.floors) floorsData.pop();
+  state.activeFloor = clamp(state.activeFloor, 0, state.floors-1);
+}
 
-function buildToolbar(){
-  const tools = [
-    { id:'select', label:'เลือก/ย้าย', icon: iconSelect() },
-    { id:'room', label:'วาดห้อง', icon: iconSquare('#F4EADA'), wide:true },
-    { id:'door', label:'ประตู', icon: iconLine() },
-    { id:'window', label:'หน้าต่าง', icon: iconWin() },
-    { id:'aircon', label:'แอร์', icon: iconAc(), wide:true },
-  ];
-  els.toolGrid.innerHTML = '';
-  tools.forEach(t => {
-    const b = document.createElement('div');
-    b.className = 'tool-btn' + (t.wide?' wide':'') + (currentTool===t.id ? ' active':'');
-    b.innerHTML = `${t.icon}<span>${t.label}</span>`;
-    b.onclick = () => { currentTool = t.id; currentFurniture=null; buildToolbar(); };
-    els.toolGrid.appendChild(b);
-  });
-  FURNITURE_TYPES.forEach(f => {
-    const b = document.createElement('div');
-    b.className = 'tool-btn' + (currentTool==='furniture' && currentFurniture===f.key ? ' active':'');
-    b.innerHTML = `${iconSquare('#e4ddcf')}<span>${f.label}</span>`;
-    b.onclick = () => { currentTool='furniture'; currentFurniture=f.key; buildToolbar(); };
-    els.toolGrid.appendChild(b);
+/* ---------------- view tabs ---------------- */
+const VIEWS = [
+  {key:'plan2d', label:'ผังพื้น 2D'}, {key:'elevation3d', label:'ภายนอก 3D'},
+  {key:'electrical', label:'ผังไฟฟ้า'}, {key:'plumbing', label:'ผังประปา'},
+];
+function buildViewTabs(){
+  els.viewTabs.innerHTML='';
+  VIEWS.forEach(v=>{
+    const b=document.createElement('div');
+    b.className='viewtab'+(state.view===v.key?' active':'');
+    b.textContent=v.label;
+    b.onclick=()=>{ state.view=v.key; selectedId=null; currentTool='select'; currentSubtype=null; closeSheet(); refreshAll(); };
+    els.viewTabs.appendChild(b);
   });
 }
 
-// ---------------- Floor tabs ----------------
+/* ---------------- floor tabs ---------------- */
 function buildFloorTabs(){
-  els.floorTabs.innerHTML = '';
-  floorsData.forEach((f,i) => {
-    const b = document.createElement('div');
-    b.className = 'tab' + (i===state.activeFloor?' active':'');
-    b.textContent = `ชั้น ${i+1}`;
-    b.onclick = () => { state.activeFloor = i; selectedId=null; renderProps(); renderCanvas(); };
+  els.floorTabs.style.display = state.view==='elevation3d' ? 'none' : 'flex';
+  els.floorTabs.innerHTML='';
+  floorsData.forEach((f,i)=>{
+    const b=document.createElement('div');
+    b.className='tab'+(i===state.activeFloor?' active':'');
+    b.textContent=`ชั้น ${i+1}`;
+    b.onclick=()=>{ state.activeFloor=i; selectedId=null; closeSheet(); renderCanvas(); };
     els.floorTabs.appendChild(b);
   });
-  const add = document.createElement('div');
-  add.className = 'tab-icon-btn'; add.textContent = '+';
-  add.title = 'เพิ่มชั้น';
-  add.onclick = () => { if(floorsData.length<4){ floorsData.push({objects:[]}); state.activeFloor=floorsData.length-1; buildFloorTabs(); renderCanvas(); } };
-  els.floorTabs.appendChild(add);
-  if (floorsData.length>1){
-    const rm = document.createElement('div');
-    rm.className = 'tab-icon-btn'; rm.textContent = '−';
-    rm.title = 'ลบชั้นสุดท้าย';
-    rm.onclick = () => { floorsData.pop(); state.activeFloor = clamp(state.activeFloor,0,floorsData.length-1); selectedId=null; buildFloorTabs(); renderProps(); renderCanvas(); };
-    els.floorTabs.appendChild(rm);
-  }
 }
 
-// ---------------- Properties panel ----------------
+/* ---------------- toolbar ---------------- */
+function toolIcon(fill){ return `<svg width="18" height="18"><rect x="1" y="1" width="16" height="16" rx="3" fill="${fill}" stroke="#2B3A42" stroke-width="1.4"/></svg>`; }
+function selectIcon(){ return `<svg width="18" height="18"><path d="M3 2 L15 9 L9.5 10.2 L12.5 15.5 L10 17 L7 11.7 L3 15 Z" fill="#2B3A42"/></svg>`; }
+function lineIcon(color){ return `<svg width="18" height="18"><line x1="2" y1="9" x2="16" y2="9" stroke="${color}" stroke-width="3"/></svg>`; }
+
+function buildToolbar(){
+  els.toolbar.innerHTML='';
+  const add=(id,subtype,label,icon)=>{
+    const b=document.createElement('div');
+    const active = currentTool===id && (subtype?currentSubtype===subtype:true);
+    b.className='tool-btn'+(active?' active':'');
+    b.innerHTML = `${icon}<span>${label}</span>`;
+    b.onclick=()=>{ currentTool=id; currentSubtype=subtype||null; wireStart=null; buildToolbar(); updateHint(); };
+    els.toolbar.appendChild(b);
+  };
+  add('select', null, 'เลือก/ย้าย', selectIcon());
+  if (state.view==='plan2d'){
+    add('room', null, 'วาดห้อง', toolIcon('#F4EADA'));
+    add('door', null, 'ประตู', toolIcon('#6B4226'));
+    add('window', null, 'หน้าต่าง', toolIcon('#BFDCE8'));
+    add('aircon', null, 'แอร์', toolIcon('#dfe8ea'));
+    ['bed','sofa','table','wardrobe','toilet','sink','stove','tv'].forEach(k=>add('furniture',k,DEFAULTS[k].label,toolIcon('#e4ddcf')));
+    add('furniture','tree','ต้นไม้',toolIcon('#bfe0b0'));
+    add('furniture','car','รถยนต์',toolIcon('#c9d3da'));
+  } else if (state.view==='electrical'){
+    add('point','switch','สวิตช์',toolIcon('#f5c451'));
+    add('point','outlet','ปลั๊ก',toolIcon('#f59e42'));
+    add('point','light','โคมไฟ',toolIcon('#ffe08a'));
+    add('wire', null, 'ลากสายไฟ', lineIcon('#e8a13a'));
+  } else if (state.view==='plumbing'){
+    add('point','supply','จุดจ่ายน้ำ',toolIcon('#7fb3d5'));
+    add('point','drain','ท่อระบาย',toolIcon('#5fa8a0'));
+    add('point','heater','เครื่องทำน้ำอุ่น',toolIcon('#e08a52'));
+    add('point','septic','ถังบำบัด',toolIcon('#a9825f'));
+    add('wire', null, 'ลากท่อน้ำ', lineIcon('#4a90c4'));
+  }
+  els.toolbar.style.display = state.view==='elevation3d' ? 'none' : 'flex';
+  updateHint();
+}
+
+function updateHint(){
+  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากนิ้ว/เมาส์บนภาพเพื่อหมุนดูรอบบ้าน — ต้นไม้และรถจะดึงมาจากผังชั้น 1'; return; }
+  if (currentTool==='room') els.canvasHint.textContent = 'ลากบนผังเพื่อวาดห้อง';
+  else if (currentTool==='wire') els.canvasHint.textContent = 'แตะจุดแรก แล้วแตะจุดที่สองเพื่อลากเส้นเชื่อม';
+  else if (currentTool==='select') els.canvasHint.textContent = 'แตะวัตถุเพื่อย้าย/แก้ไข ลากมุมกรอบเพื่อปรับขนาด';
+  else els.canvasHint.textContent = 'แตะบนผังเพื่อวางตำแหน่ง';
+}
+
+/* ---------------- property sheet ---------------- */
+function openSheet(){ els.propSheet.classList.remove('closed'); els.sheetBackdrop.classList.add('open'); }
+function closeSheet(){ els.propSheet.classList.add('closed'); els.sheetBackdrop.classList.remove('open'); }
+els.sheetBackdrop.onclick = ()=>{ selectedId=null; closeSheet(); renderCanvas(); };
+els.settingsToggle.onclick = ()=>{ els.settingsPanel.classList.toggle('open'); els.settingsChevron.textContent = els.settingsPanel.classList.contains('open')?'▴':'▾'; };
+
 function renderProps(){
   const o = selectedId ? findObj(selectedId) : null;
-  if (!o){
-    els.props.innerHTML = '<div class="empty">ยังไม่ได้เลือกวัตถุ — คลิกเครื่องมือด้านบนแล้วลาก/คลิกบนผังเพื่อวาง</div>';
+  if (!o){ closeSheet(); return; }
+  openSheet();
+
+  if (o.kind==='room'){
+    const opts = ROOM_TYPES.map(t=>`<option value="${t.key}" ${t.key===o.type?'selected':''}>${t.label}</option>`).join('');
+    els.propBody.innerHTML = `
+      <h3>ห้อง</h3>
+      <input type="text" id="pLabel" value="${o.label}">
+      <span class="field-label">ประเภทห้อง</span>
+      <select id="pType">${opts}</select>
+      <div class="num-row">
+        <div class="num-field"><label>กว้าง (ม.)</label><input type="number" id="pW" step="0.1" min="0.9" value="${o.w.toFixed(2)}"></div>
+        <div class="num-field"><label>ลึก (ม.)</label><input type="number" id="pH" step="0.1" min="0.9" value="${o.h.toFixed(2)}"></div>
+      </div>
+      <div class="btn-row"><button class="act btn-delete" id="pDel">ลบห้องนี้</button></div>
+    `;
+    document.getElementById('pLabel').oninput = e=>{ o.label=e.target.value; renderCanvas(); };
+    document.getElementById('pType').onchange = e=>{ o.type=e.target.value; renderCanvas(); };
+    document.getElementById('pW').oninput = e=>{ o.w=Math.max(0.9, parseFloat(e.target.value)||0.9); renderCanvas(); };
+    document.getElementById('pH').oninput = e=>{ o.h=Math.max(0.9, parseFloat(e.target.value)||0.9); renderCanvas(); };
+    document.getElementById('pDel').onclick = deleteSelected;
     return;
   }
-  if (o.kind === 'room'){
-    const opts = ROOM_TYPES.map(t => `<option value="${t.key}" ${t.key===o.type?'selected':''}>${t.label}</option>`).join('');
-    els.props.innerHTML = `
-      <label style="font-size:12.5px; font-weight:600;">ชื่อห้อง</label>
-      <input type="text" id="roomLabel" value="${o.label}">
-      <label style="font-size:12.5px; font-weight:600; display:block; margin-top:10px;">ประเภทห้อง</label>
-      <select id="roomType">${opts}</select>
-      <div style="margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);">ขนาด: ${o.w.toFixed(2)} × ${o.h.toFixed(2)} ม.</div>
-      <div class="btn-row"><button class="btn-delete" id="delBtn">ลบห้องนี้</button></div>
+
+  if (o.kind==='elecPoint' || o.kind==='plumbPoint'){
+    els.propBody.innerHTML = `
+      <h3>${DEFAULTS[o.subtype].label}</h3>
+      <div class="btn-row"><button class="act btn-delete" id="pDel">ลบ</button></div>
     `;
-    document.getElementById('roomLabel').oninput = e => { o.label = e.target.value; renderCanvas(); };
-    document.getElementById('roomType').onchange = e => { o.type = e.target.value; renderCanvas(); };
-    document.getElementById('delBtn').onclick = deleteSelected;
-  } else {
-    const nameMap = { door:'ประตู', window:'หน้าต่าง', aircon:'แอร์' };
-    const label = o.kind==='furniture' ? FURN_DEF[o.subtype].label : nameMap[o.kind];
-    els.props.innerHTML = `
-      <div style="font-weight:600; margin-bottom:6px;">${label}</div>
-      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);">ขนาด: ${o.w.toFixed(2)} × ${o.h.toFixed(2)} ม.</div>
-      <div class="btn-row">
-        <button class="btn-rotate" id="rotBtn">หมุน 90°</button>
-        <button class="btn-delete" id="delBtn">ลบ</button>
-      </div>
-    `;
-    document.getElementById('rotBtn').onclick = () => { const t=o.w; o.w=o.h; o.h=t; renderCanvas(); };
-    document.getElementById('delBtn').onclick = deleteSelected;
+    document.getElementById('pDel').onclick = deleteSelected;
+    return;
   }
+
+  if (o.kind==='wire' || o.kind==='pipe'){
+    els.propBody.innerHTML = `<h3>${o.kind==='wire'?'เส้นสายไฟ':'เส้นท่อน้ำ'}</h3><div class="btn-row"><button class="act btn-delete" id="pDel">ลบเส้นนี้</button></div>`;
+    document.getElementById('pDel').onclick = deleteSelected;
+    return;
+  }
+
+  // door / window / aircon / furniture
+  const label = o.kind==='furniture' ? DEFAULTS[o.subtype].label : DEFAULTS[o.kind].label;
+  const min = o.kind==='furniture' ? DEFAULTS[o.subtype].min : DEFAULTS[o.kind].min;
+  els.propBody.innerHTML = `
+    <h3>${label}</h3>
+    <div class="num-row">
+      <div class="num-field"><label>กว้าง (ม.)</label><input type="number" id="pW" step="0.05" min="${min}" value="${o.w.toFixed(2)}"></div>
+      <div class="num-field"><label>ยาว (ม.)</label><input type="number" id="pH" step="0.05" min="${min}" value="${o.h.toFixed(2)}"></div>
+    </div>
+    <div class="num-row">
+      <div class="num-field" style="flex:1 1 100%;"><label>มุมหมุน (องศา)</label><input type="number" id="pR" step="15" value="${Math.round(o.rotation||0)}"></div>
+    </div>
+    <div class="btn-row">
+      <button class="act btn-rotate" id="pRot90">หมุน 90°</button>
+      <button class="act btn-delete" id="pDel">ลบ</button>
+    </div>
+  `;
+  document.getElementById('pW').oninput = e=>{ o.w=Math.max(min, parseFloat(e.target.value)||min); renderCanvas(); };
+  document.getElementById('pH').oninput = e=>{ o.h=Math.max(min, parseFloat(e.target.value)||min); renderCanvas(); };
+  document.getElementById('pR').oninput = e=>{ o.rotation = parseFloat(e.target.value)||0; renderCanvas(); };
+  document.getElementById('pRot90').onclick = ()=>{ o.rotation = ((o.rotation||0)+90)%360; renderProps(); renderCanvas(); };
+  document.getElementById('pDel').onclick = deleteSelected;
 }
 
 function deleteSelected(){
-  const f = curFloor();
-  f.objects = f.objects.filter(o => o.id !== selectedId);
-  selectedId = null;
-  renderProps(); renderCanvas();
+  const arr = activeArray();
+  const idx = arr.findIndex(o=>o.id===selectedId);
+  if (idx>=0){
+    const removedId = arr[idx].id;
+    arr.splice(idx,1);
+    // cascade delete wires/pipes referencing this point
+    for (let i=arr.length-1;i>=0;i--){
+      if ((arr[i].kind==='wire'||arr[i].kind==='pipe') && (arr[i].fromId===removedId || arr[i].toId===removedId)) arr.splice(i,1);
+    }
+  }
+  selectedId=null; closeSheet(); renderCanvas();
 }
 
-// ---------------- SVG drawing ----------------
+/* ---------------- 2D drawing helpers ---------------- */
 function svgOpen(w,h){ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`; }
 function px(m){ return m*SCALE; }
+function wx(m){ return MARGIN.left+px(m); }
+function wy(m){ return MARGIN.top+px(m); }
 
-function drawRoom(o, selected){
-  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
-  let s = `<g data-id="${o.id}" data-kind="room">`;
+function rotWrap(o, inner){
+  const cx = wx(o.x+o.w/2), cy = wy(o.y+o.h/2);
+  return `<g data-id="${o.id}" transform="rotate(${o.rotation||0} ${cx} ${cy})">${inner}</g>`;
+}
+function selOutline(o){
+  const x=wx(o.x)-4, y=wy(o.y)-4, w=px(o.w)+8, h=px(o.h)+8;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="5 3"/>`;
+}
+function handles(o){
+  const pts = [[o.x,o.y,'tl'],[o.x+o.w,o.y,'tr'],[o.x,o.y+o.h,'bl'],[o.x+o.w,o.y+o.h,'br']];
+  return pts.map(([mx,my,hd])=>{
+    const x=wx(mx), y=wy(my);
+    return `<rect data-handle="${hd}" data-id="${o.id}" x="${x-9}" y="${y-9}" width="18" height="18" fill="#fff" stroke="#D6349B" stroke-width="2"/>`;
+  }).join('');
+}
+
+function drawRoom(o, sel){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  let s = `<g data-id="${o.id}">`;
   s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#2B3A42" stroke-width="2.5"/>`;
-  s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#2B3A42" font-family="Sarabun,sans-serif">${o.label}</text>`;
-  s += `<text x="${x+w/2}" y="${y+h/2+14}" text-anchor="middle" font-size="11" fill="#5B6B72" font-family="Sarabun,sans-serif">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
-  if (selected){
-    s += `<rect x="${x-3}" y="${y-3}" width="${w+6}" height="${h+6}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="6 4"/>`;
-    [[x,y,'tl'],[x+w,y,'tr'],[x,y+h,'bl'],[x+w,y+h,'br']].forEach(([cx,cy,hd]) => {
-      s += `<rect data-handle="${hd}" data-id="${o.id}" x="${cx-7}" y="${cy-7}" width="14" height="14" fill="#fff" stroke="#D6349B" stroke-width="2"/>`;
-    });
-  }
+  s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="13" font-weight="600" fill="#2B3A42">${o.label}</text>`;
+  s += `<text x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle" font-size="10.5" fill="#5B6B72">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
   s += `</g>`;
+  if (sel) s += selOutline(o) + handles(o);
   return s;
 }
-
-function drawDoor(o, selected){
-  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
-  const horizontal = o.w >= o.h;
-  let s = `<g data-id="${o.id}" data-kind="door">`;
-  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#fff" stroke-width="0"/>`;
-  if (horizontal){
-    s += `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#6B4226" stroke-width="4"/>`;
-    s += `<path d="M ${x} ${y+h/2} A ${w} ${w} 0 0 1 ${x+w*0.15} ${y+h/2-w*0.85}" fill="none" stroke="#6B4226" stroke-width="1.4" stroke-dasharray="3 3"/>`;
-  } else {
-    s += `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#6B4226" stroke-width="4"/>`;
-    s += `<path d="M ${x+w/2} ${y} A ${h} ${h} 0 0 0 ${x+w/2-h*0.85} ${y+h*0.15}" fill="none" stroke="#6B4226" stroke-width="1.4" stroke-dasharray="3 3"/>`;
-  }
-  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
-  s += `</g>`;
-  return s;
+function drawRoomBackdrop(o){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#f1efe9" stroke="#d8d2c2" stroke-width="1.5"/>
+          <text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" font-size="10.5" fill="#b7b0a0">${o.label}</text>`;
 }
 
-function drawWindow(o, selected){
-  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
-  let s = `<g data-id="${o.id}" data-kind="window">`;
-  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#BFDCE8" stroke="#2B3A42" stroke-width="2"/>`;
-  if (o.w >= o.h) s += `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#2B3A42" stroke-width="1.4"/>`;
-  else s += `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.4"/>`;
-  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
-  s += `</g>`;
+function drawDoor(o, sel){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  let inner = o.w>=o.h
+    ? `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#6B4226" stroke-width="4"/>`
+    : `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#6B4226" stroke-width="4"/>`;
+  let s = rotWrap(o, inner);
+  if (sel) s += selOutline(o) + handles(o);
   return s;
 }
-
-function drawAircon(o, selected){
-  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
-  let s = `<g data-id="${o.id}" data-kind="aircon">`;
-  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#E7ECEC" stroke="#2B3A42" stroke-width="1.8"/>`;
-  for (let i=1;i<=3;i++){
-    const ly = y + h*(i/4);
-    s += `<line x1="${x+w*0.1}" y1="${ly}" x2="${x+w*0.9}" y2="${ly}" stroke="#8fa3a8" stroke-width="1.2"/>`;
-  }
-  s += `<text x="${x+w/2}" y="${y+h+13}" text-anchor="middle" font-size="10" fill="#5B6B72" font-family="Sarabun,sans-serif">แอร์</text>`;
-  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+16}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
-  s += `</g>`;
+function drawWindow(o, sel){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#BFDCE8" stroke="#2B3A42" stroke-width="2"/>`;
+  inner += o.w>=o.h ? `<line x1="${x}" y1="${y+h/2}" x2="${x+w}" y2="${y+h/2}" stroke="#2B3A42" stroke-width="1.3"/>`
+                    : `<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.3"/>`;
+  let s = rotWrap(o, inner);
+  if (sel) s += selOutline(o) + handles(o);
   return s;
 }
-
-function drawFurniture(o, selected){
-  const x = MARGIN.left+px(o.x), y = MARGIN.top+px(o.y), w = px(o.w), h = px(o.h);
-  const def = FURN_DEF[o.subtype];
-  let inner = '';
+function drawAircon(o, sel){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  let inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#E7ECEC" stroke="#2B3A42" stroke-width="1.6"/>`;
+  for (let i=1;i<=3;i++){ const ly=y+h*(i/4); inner += `<line x1="${x+w*0.1}" y1="${ly}" x2="${x+w*0.9}" y2="${ly}" stroke="#8fa3a8" stroke-width="1.1"/>`; }
+  let s = rotWrap(o, inner);
+  if (sel) s += selOutline(o) + handles(o);
+  return s;
+}
+function drawFurniture(o, sel){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  let inner='';
   switch(o.subtype){
-    case 'bed':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#EFE0C8" stroke="#2B3A42" stroke-width="2"/>
-        <rect x="${x+w*0.08}" y="${y+h*0.06}" width="${w*0.84}" height="${h*0.2}" fill="#fff" stroke="#2B3A42" stroke-width="1"/>`;
-      break;
-    case 'sofa':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D9C9DB" stroke="#2B3A42" stroke-width="2"/>`;
-      for(let i=1;i<3;i++) inner += `<line x1="${x+w*i/3}" y1="${y}" x2="${x+w*i/3}" y2="${y+h}" stroke="#2B3A42" stroke-width="1"/>`;
-      break;
-    case 'table':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DCC9A6" stroke="#2B3A42" stroke-width="2"/>
-        <ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.38}" ry="${h*0.32}" fill="none" stroke="#2B3A42" stroke-width="1"/>`;
-      break;
-    case 'wardrobe':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#C9B79C" stroke="#2B3A42" stroke-width="2"/>
-        <line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.2"/>`;
-      break;
-    case 'toilet':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h*0.3}" fill="#fff" stroke="#2B3A42" stroke-width="1.6"/>
-        <ellipse cx="${x+w/2}" cy="${y+h*0.65}" rx="${w*0.42}" ry="${h*0.35}" fill="#fff" stroke="#2B3A42" stroke-width="1.6"/>`;
-      break;
-    case 'sink':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#fff" stroke="#2B3A42" stroke-width="1.6"/>
-        <ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.32}" ry="${h*0.28}" fill="#D6E6EC" stroke="#2B3A42" stroke-width="1"/>`;
-      break;
-    case 'stove':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DADFE0" stroke="#2B3A42" stroke-width="2"/>`;
-      [[0.3,0.3],[0.7,0.3],[0.3,0.7],[0.7,0.7]].forEach(([fx,fy]) => {
-        inner += `<circle cx="${x+w*fx}" cy="${y+h*fy}" r="${Math.min(w,h)*0.12}" fill="none" stroke="#2B3A42" stroke-width="1.2"/>`;
-      });
-      break;
-    case 'tv':
-      inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#2B3A42" stroke="#2B3A42" stroke-width="2"/>
-        <rect x="${x+w*0.06}" y="${y+h*0.15}" width="${w*0.88}" height="${h*0.7}" fill="#5B6B72"/>`;
-      break;
+    case 'bed': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#EFE0C8" stroke="#2B3A42" stroke-width="2"/><rect x="${x+w*0.08}" y="${y+h*0.06}" width="${w*0.84}" height="${h*0.2}" fill="#fff" stroke="#2B3A42" stroke-width="1"/>`; break;
+    case 'sofa': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#D9C9DB" stroke="#2B3A42" stroke-width="2"/>` + [1,2].map(i=>`<line x1="${x+w*i/3}" y1="${y}" x2="${x+w*i/3}" y2="${y+h}" stroke="#2B3A42" stroke-width="1"/>`).join(''); break;
+    case 'table': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DCC9A6" stroke="#2B3A42" stroke-width="2"/><ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.38}" ry="${h*0.32}" fill="none" stroke="#2B3A42" stroke-width="1"/>`; break;
+    case 'wardrobe': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#C9B79C" stroke="#2B3A42" stroke-width="2"/><line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#2B3A42" stroke-width="1.2"/>`; break;
+    case 'toilet': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h*0.3}" fill="#fff" stroke="#2B3A42" stroke-width="1.5"/><ellipse cx="${x+w/2}" cy="${y+h*0.65}" rx="${w*0.42}" ry="${h*0.35}" fill="#fff" stroke="#2B3A42" stroke-width="1.5"/>`; break;
+    case 'sink': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#fff" stroke="#2B3A42" stroke-width="1.5"/><ellipse cx="${x+w/2}" cy="${y+h/2}" rx="${w*0.32}" ry="${h*0.28}" fill="#D6E6EC" stroke="#2B3A42" stroke-width="1"/>`; break;
+    case 'stove': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#DADFE0" stroke="#2B3A42" stroke-width="2"/>` + [[.3,.3],[.7,.3],[.3,.7],[.7,.7]].map(([fx,fy])=>`<circle cx="${x+w*fx}" cy="${y+h*fy}" r="${Math.min(w,h)*0.12}" fill="none" stroke="#2B3A42" stroke-width="1.1"/>`).join(''); break;
+    case 'tv': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#2B3A42"/><rect x="${x+w*0.06}" y="${y+h*0.15}" width="${w*0.88}" height="${h*0.7}" fill="#5B6B72"/>`; break;
+    case 'tree': inner = `<circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.min(w,h)/2}" fill="#BFE0B0" stroke="#5b8a4a" stroke-width="1.6"/><circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.min(w,h)/5}" fill="#8a6a4a"/>`; break;
+    case 'car': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w*0.18}" fill="#c9d3da" stroke="#2B3A42" stroke-width="1.8"/><rect x="${x+w*0.12}" y="${y+h*0.12}" width="${w*0.76}" height="${h*0.22}" fill="#7fa0b5"/>`; break;
   }
-  let s = `<g data-id="${o.id}" data-kind="furniture">${inner}`;
-  s += `<text x="${x+w/2}" y="${y+h+11}" text-anchor="middle" font-size="9.5" fill="#5B6B72" font-family="Sarabun,sans-serif">${def.label}</text>`;
-  if (selected) s += `<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="none" stroke="#D6349B" stroke-width="2" stroke-dasharray="4 3"/>`;
-  s += `</g>`;
+  let s = rotWrap(o, inner);
+  s += `<text x="${wx(o.x+o.w/2)}" y="${wy(o.y+o.h)+11}" text-anchor="middle" font-size="9" fill="#5B6B72">${DEFAULTS[o.subtype].label}</text>`;
+  if (sel) s += selOutline(o) + handles(o);
   return s;
 }
 
+function drawPoint(o, sel, palette){
+  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+  const c = palette[o.subtype];
+  let inner = `<circle cx="${x+w/2}" cy="${y+h/2}" r="${Math.max(w,h)/2}" fill="${c.fill}" stroke="#2B3A42" stroke-width="1.6"/>
+    <text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" font-size="10" font-weight="700" fill="#2B3A42">${c.tag}</text>`;
+  let s = `<g data-id="${o.id}">${inner}</g>`;
+  if (sel) s += selOutline(o);
+  return s;
+}
+const ELEC_PALETTE = { switch:{fill:'#f5c451',tag:'S'}, outlet:{fill:'#f59e42',tag:'P'}, light:{fill:'#ffe08a',tag:'L'} };
+const PLUMB_PALETTE = { supply:{fill:'#7fb3d5',tag:'น'}, drain:{fill:'#5fa8a0',tag:'ระ'}, heater:{fill:'#e08a52',tag:'ทน'}, septic:{fill:'#a9825f',tag:'ถ'} };
+
+function drawConnector(o, arr, sel, color){
+  const from = arr.find(p=>p.id===o.fromId), to = arr.find(p=>p.id===o.toId);
+  if (!from || !to) return '';
+  const x1=wx(from.x+from.w/2), y1=wy(from.y+from.h/2), x2=wx(to.x+to.w/2), y2=wy(to.y+to.h/2);
+  let s = `<g data-id="${o.id}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="3" stroke-dasharray="7 4"/></g>`;
+  if (sel) s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#D6349B" stroke-width="6" opacity="0.3"/>`;
+  return s;
+}
+
+/* ---------------- main render dispatch ---------------- */
 function renderCanvas(){
-  const W = state.width, D = state.depth;
+  buildFloorTabs();
+  if (state.view==='elevation3d'){ renderElevation3D(); return; }
+  const W=state.width, D=state.depth;
   const pxW = px(W)+MARGIN.left+MARGIN.right, pxH = px(D)+MARGIN.top+MARGIN.bottom;
-  let s = svgOpen(pxW, pxH);
+  let s = svgOpen(pxW,pxH);
   s += `<rect x="0" y="0" width="${pxW}" height="${pxH}" fill="#FBF9F3"/>`;
   s += `<rect x="${MARGIN.left}" y="${MARGIN.top}" width="${px(W)}" height="${px(D)}" fill="none" stroke="#c9c0a6" stroke-width="1.5" stroke-dasharray="5 4"/>`;
-  s += `<text class="dim" x="${MARGIN.left+px(W)/2}" y="${MARGIN.top-12}" text-anchor="middle" font-size="18" fill="#D6349B" font-family="Caveat,cursive">${W.toFixed(1)} ม.</text>`;
-  s += `<text class="dim" x="${MARGIN.left+px(W)+18}" y="${MARGIN.top+px(D)/2}" text-anchor="middle" font-size="18" fill="#D6349B" font-family="Caveat,cursive" transform="rotate(90 ${MARGIN.left+px(W)+18} ${MARGIN.top+px(D)/2})">${D.toFixed(1)} ม.</text>`;
+  s += `<text x="${MARGIN.left+px(W)/2}" y="${MARGIN.top-10}" text-anchor="middle" font-size="16" fill="#D6349B" font-family="Caveat,cursive">${W.toFixed(1)} ม.</text>`;
 
   const f = curFloor();
-  f.objects.filter(o=>o.kind==='room').forEach(o => s += drawRoom(o, o.id===selectedId));
-  f.objects.filter(o=>o.kind!=='room').forEach(o => {
-    if (o.kind==='door') s += drawDoor(o, o.id===selectedId);
-    else if (o.kind==='window') s += drawWindow(o, o.id===selectedId);
-    else if (o.kind==='aircon') s += drawAircon(o, o.id===selectedId);
-    else if (o.kind==='furniture') s += drawFurniture(o, o.id===selectedId);
-  });
-
-  if (previewRoom){
-    const x = MARGIN.left+px(previewRoom.x), y = MARGIN.top+px(previewRoom.y), w=px(previewRoom.w), h=px(previewRoom.h);
-    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(214,52,155,0.08)" stroke="#D6349B" stroke-width="2" stroke-dasharray="6 4"/>`;
+  if (state.view==='plan2d'){
+    f.objects.filter(o=>o.kind==='room').forEach(o=>s+=drawRoom(o,o.id===selectedId));
+    f.objects.filter(o=>o.kind!=='room').forEach(o=>{
+      if (o.kind==='door') s+=drawDoor(o,o.id===selectedId);
+      else if (o.kind==='window') s+=drawWindow(o,o.id===selectedId);
+      else if (o.kind==='aircon') s+=drawAircon(o,o.id===selectedId);
+      else if (o.kind==='furniture') s+=drawFurniture(o,o.id===selectedId);
+    });
+    if (previewRoom){
+      const x=wx(previewRoom.x), y=wy(previewRoom.y), w=px(previewRoom.w), h=px(previewRoom.h);
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(214,52,155,0.08)" stroke="#D6349B" stroke-width="2" stroke-dasharray="6 4"/>`;
+    }
+  } else if (state.view==='electrical'){
+    f.objects.filter(o=>o.kind==='room').forEach(o=>s+=drawRoomBackdrop(o));
+    f.electrical.filter(o=>o.kind==='wire').forEach(o=>s+=drawConnector(o, f.electrical, o.id===selectedId, '#e8a13a'));
+    f.electrical.filter(o=>o.kind==='elecPoint').forEach(o=>s+=drawPoint(o,o.id===selectedId,ELEC_PALETTE));
+  } else if (state.view==='plumbing'){
+    f.objects.filter(o=>o.kind==='room').forEach(o=>s+=drawRoomBackdrop(o));
+    f.plumbing.filter(o=>o.kind==='pipe').forEach(o=>s+=drawConnector(o, f.plumbing, o.id===selectedId, '#4a90c4'));
+    f.plumbing.filter(o=>o.kind==='plumbPoint').forEach(o=>s+=drawPoint(o,o.id===selectedId,PLUMB_PALETTE));
   }
-
   s += `</svg>`;
   els.canvasWrap.innerHTML = s;
 }
 
-// ---------------- Interaction ----------------
+/* ---------------- 3D exterior (pure math projection, no CSS 3D) ---------------- */
+function project(x,y,z){
+  const cx = x*Math.cos(theta) - z*Math.sin(theta);
+  const cz = x*Math.sin(theta) + z*Math.cos(theta);
+  const sx = (cx - cz) * Math.cos(phi);
+  const sy = (cx + cz) * Math.sin(phi) - y;
+  return { sx, sy, depth: cx+cz };
+}
+function shade(hex, amt){
+  const n = parseInt(hex.replace('#',''),16);
+  let r=(n>>16)+Math.round(255*amt), g=((n>>8)&255)+Math.round(255*amt), b=(n&255)+Math.round(255*amt);
+  r=clamp(r,0,255); g=clamp(g,0,255); b=clamp(b,0,255);
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
+}
+function poly(pts, fill){
+  return `<polygon points="${pts.map(p=>`${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')}" fill="${fill}" stroke="#2B3A42" stroke-width="1"/>`;
+}
+
+function renderElevation3D(){
+  const W=state.width, D=state.depth, H=state.floors*FLOOR_H;
+  const hw=W/2, hd=D/2;
+  const color = state.houseColor;
+  const roofColor = '#3A4750';
+
+  const P = (x,y,z)=>project(x,y,z);
+  const items = []; // {depth, svg}
+
+  // ground plane (drawn first, unconditionally)
+  const gsize = Math.max(W,D)*1.8, gh=gsize/2;
+  const gCorners = [P(-gh,0,-gh),P(gh,0,-gh),P(gh,0,gh),P(-gh,0,gh)];
+  let groundSvg = poly(gCorners, '#E4EEDD');
+
+  // house 8 corners
+  const b_fl=P(-hw,0,hd), b_fr=P(hw,0,hd), b_bl=P(-hw,0,-hd), b_br=P(hw,0,-hd);
+  const t_fl=P(-hw,H,hd), t_fr=P(hw,H,hd), t_bl=P(-hw,H,-hd), t_br=P(hw,H,-hd);
+
+  const faces = [
+    { name:'front', pts:[b_fl,b_fr,t_fr,t_fl], shade:0.05 },
+    { name:'back', pts:[b_br,b_bl,t_bl,t_br], shade:-0.18 },
+    { name:'left', pts:[b_bl,b_fl,t_fl,t_bl], shade:-0.08 },
+    { name:'right', pts:[b_fr,b_br,t_br,t_fr], shade:-0.02 },
+  ];
+  faces.forEach(fc=>{
+    const avg = { depth: (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth+fc.pts[3].depth)/4 };
+    items.push({ depth: avg.depth, svg: poly(fc.pts, shade(color, fc.shade)) });
+  });
+
+  // roof (simple 4-triangle pyramid)
+  const roofH = 1.3;
+  const apex = P(0, H+roofH, 0);
+  const roofFaces = [
+    { pts:[t_fl,t_fr,apex], shade:0.08 },
+    { pts:[t_fr,t_br,apex], shade:-0.05 },
+    { pts:[t_br,t_bl,apex], shade:-0.16 },
+    { pts:[t_bl,t_fl,apex], shade:-0.09 },
+  ];
+  roofFaces.forEach(fc=>{
+    const avg = (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth)/3;
+    items.push({ depth:avg, svg: poly(fc.pts, shade(roofColor, fc.shade)) });
+  });
+
+  // windows + door on FRONT face (approximate, auto-generated per floor)
+  for (let fl=0; fl<state.floors; fl++){
+    const floorObjs = (floorsData[fl] && floorsData[fl].objects) || [];
+    const bedCount = Math.max(1, floorObjs.filter(o=>o.kind==='room' && o.type==='bedroom').length);
+    const winCount = fl===0 ? Math.max(1,bedCount-1) : bedCount+1;
+    const yBase = fl*FLOOR_H;
+    const usable = W-1;
+    for (let i=1;i<=winCount;i++){
+      const wx0 = -W/2 + 0.5 + usable*(i/(winCount+1)) - 0.4;
+      const p1=P(wx0,yBase+1.1,hd), p2=P(wx0+0.8,yBase+1.1,hd), p3=P(wx0+0.8,yBase+2.0,hd), p4=P(wx0,yBase+2.0,hd);
+      const avg=(p1.depth+p2.depth+p3.depth+p4.depth)/4 + 0.02;
+      items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#BFDCE8') });
+    }
+  }
+  {
+    const dw=0.9, dh=2.0;
+    const p1=P(-dw/2,0,hd), p2=P(dw/2,0,hd), p3=P(dw/2,dh,hd), p4=P(-dw/2,dh,hd);
+    const avg=(p1.depth+p2.depth+p3.depth+p4.depth)/4 + 0.03;
+    items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#6B4226') });
+  }
+
+  // trees & cars from ground floor (floor 0) plan objects
+  const groundObjs = (floorsData[0] && floorsData[0].objects) || [];
+  groundObjs.filter(o=>o.kind==='furniture' && (o.subtype==='tree'||o.subtype==='car')).forEach(o=>{
+    const worldX = (o.x+o.w/2) - W/2, worldZ = (o.y+o.h/2) - D/2;
+    const base = P(worldX,0,worldZ);
+    const isTree = o.subtype==='tree';
+    const iw = isTree?30:40, ih = isTree?42:22;
+    let svg;
+    if (isTree){
+      svg = `<line x1="${base.sx}" y1="${base.sy}" x2="${base.sx}" y2="${base.sy-ih*0.35}" stroke="#8a6a4a" stroke-width="3"/>
+             <circle cx="${base.sx}" cy="${base.sy-ih*0.6}" r="${iw/2}" fill="#8fbf7a" stroke="#5b8a4a" stroke-width="1.5"/>`;
+    } else {
+      svg = `<rect x="${base.sx-iw/2}" y="${base.sy-ih}" width="${iw}" height="${ih}" rx="5" fill="#c9d3da" stroke="#2B3A42" stroke-width="1.4"/>`;
+    }
+    items.push({ depth: base.depth+0.05, svg });
+  });
+
+  items.sort((a,b)=>a.depth-b.depth);
+
+  // dynamic viewBox from all projected points
+  const allPts = [b_fl,b_fr,b_bl,b_br,t_fl,t_fr,t_bl,t_br,apex,...gCorners];
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  allPts.forEach(p=>{ minX=Math.min(minX,p.sx); maxX=Math.max(maxX,p.sx); minY=Math.min(minY,p.sy); maxY=Math.max(maxY,p.sy); });
+  const pad=40;
+  const vbX=minX-pad, vbY=minY-pad, vbW=(maxX-minX)+pad*2, vbH=(maxY-minY)+pad*2;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}" width="${Math.round(vbW)}" height="${Math.round(vbH)}">`;
+  s += `<rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#EAF2F6"/>`;
+  s += groundSvg;
+  items.forEach(it=>s+=it.svg);
+  s += `</svg>`;
+  els.canvasWrap.innerHTML = s;
+  updateHint();
+}
+
+/* ---------------- interaction: pointer handling ---------------- */
 function toMeters(evt){
   const svg = els.canvasWrap.querySelector('svg');
   if (!svg) return {x:0,y:0};
   const pt = svg.createSVGPoint();
   pt.x = evt.clientX; pt.y = evt.clientY;
   const p = pt.matrixTransform(svg.getScreenCTM().inverse());
-  return { x: (p.x - MARGIN.left)/SCALE, y: (p.y - MARGIN.top)/SCALE };
+  return { x:(p.x-MARGIN.left)/SCALE, y:(p.y-MARGIN.top)/SCALE };
 }
 
 function hitTestHandle(pt){
-  if (!selectedId) return null;
+  if (!selectedId || state.view!=='plan2d') return null;
   const o = findObj(selectedId);
   if (!o || o.kind!=='room') return null;
   const corners = { tl:[o.x,o.y], tr:[o.x+o.w,o.y], bl:[o.x,o.y+o.h], br:[o.x+o.w,o.y+o.h] };
-  const thresh = 0.22;
-  for (const key in corners){
-    const [cx,cy] = corners[key];
-    if (Math.abs(pt.x-cx)<thresh && Math.abs(pt.y-cy)<thresh) return { handle:key, room:o };
-  }
+  const thresh = 0.3;
+  for (const k in corners){ const [cx,cy]=corners[k]; if (Math.abs(pt.x-cx)<thresh && Math.abs(pt.y-cy)<thresh) return {handle:k, room:o}; }
   return null;
 }
-
+function ptSegDist(pt, a, b){
+  const dx=b.x-a.x, dy=b.y-a.y;
+  const len2 = dx*dx+dy*dy || 1e-6;
+  let t = ((pt.x-a.x)*dx + (pt.y-a.y)*dy)/len2;
+  t = clamp(t,0,1);
+  const px_=a.x+t*dx, py_=a.y+t*dy;
+  return Math.hypot(pt.x-px_, pt.y-py_);
+}
 function hitTestObject(pt){
-  const objs = curFloor().objects;
-  for (let i=objs.length-1;i>=0;i--){
-    const o = objs[i];
-    if (pt.x>=o.x-0.05 && pt.x<=o.x+o.w+0.05 && pt.y>=o.y-0.05 && pt.y<=o.y+o.h+0.05) return o;
+  const arr = activeArray();
+  for (let i=arr.length-1;i>=0;i--){
+    const o = arr[i];
+    if (o.kind==='wire' || o.kind==='pipe') continue;
+    const cx=o.x+o.w/2, cy=o.y+o.h/2;
+    const rad = -(o.rotation||0)*Math.PI/180;
+    const dx=pt.x-cx, dy=pt.y-cy;
+    const lx = cx + (dx*Math.cos(rad)-dy*Math.sin(rad));
+    const ly = cy + (dx*Math.sin(rad)+dy*Math.cos(rad));
+    if (lx>=o.x-0.08 && lx<=o.x+o.w+0.08 && ly>=o.y-0.08 && ly<=o.y+o.h+0.08) return o;
+  }
+  for (let i=arr.length-1;i>=0;i--){
+    const o = arr[i];
+    if (o.kind!=='wire' && o.kind!=='pipe') continue;
+    const from = arr.find(p=>p.id===o.fromId), to = arr.find(p=>p.id===o.toId);
+    if (!from || !to) continue;
+    const a={x:from.x+from.w/2,y:from.y+from.h/2}, b={x:to.x+to.w/2,y:to.y+to.h/2};
+    if (ptSegDist(pt,a,b) < 0.2) return o;
   }
   return null;
 }
-
 function anchorFor(handle, room){
   if (handle==='tl') return { x: room.x+room.w, y: room.y+room.h };
   if (handle==='tr') return { x: room.x, y: room.y+room.h };
@@ -454,141 +676,155 @@ function anchorFor(handle, room){
   return { x: room.x, y: room.y };
 }
 
-els.canvasWrap.addEventListener('pointerdown', e => {
-  const pt = toMeters(e);
-  const hHit = hitTestHandle(pt);
-  if (hHit){
-    resizing = { room: hHit.room, anchor: anchorFor(hHit.handle, hHit.room) };
-    e.preventDefault();
+function onCanvasDown(e){
+  if (state.view==='elevation3d'){
+    dragging3d=true; lastX=e.clientX; lastY=e.clientY;
     return;
   }
+  const pt = toMeters(e);
+  const hHit = hitTestHandle(pt);
+  if (hHit){ resizing = { room:hHit.room, anchor: anchorFor(hHit.handle, hHit.room) }; e.preventDefault(); return; }
+
+  if (currentTool==='wire'){
+    const hit = hitTestObject(pt);
+    if (hit && (hit.kind==='elecPoint' || hit.kind==='plumbPoint')){
+      if (!wireStart) { wireStart = hit.id; selectedId = hit.id; renderCanvas(); }
+      else if (wireStart !== hit.id){
+        const kind = state.view==='electrical' ? 'wire' : 'pipe';
+        activeArray().push({ id:'o'+(uid++), kind, fromId:wireStart, toId:hit.id });
+        wireStart = null; selectedId=null; closeSheet(); renderCanvas();
+      }
+    }
+    return;
+  }
+
   const hit = hitTestObject(pt);
   if (hit){
     selectedId = hit.id;
-    movingId = hit.id;
-    dragOffset = { x: pt.x-hit.x, y: pt.y-hit.y };
+    if (hit.kind!=='wire' && hit.kind!=='pipe'){ movingId=hit.id; dragOffset={x:pt.x-hit.x,y:pt.y-hit.y}; }
     renderProps(); renderCanvas();
     e.preventDefault();
     return;
   }
-  // empty area
-  if (currentTool==='room'){
-    const cx = clamp(snap(pt.x),0,state.width), cy = clamp(snap(pt.y),0,state.depth);
-    drawingRoom = { startX: cx, startY: cy };
-    previewRoom = { x:cx, y:cy, w:0, h:0 };
-  } else if (currentTool==='door' || currentTool==='window' || currentTool==='aircon'){
-    const def = DEFAULT_SIZE[currentTool];
-    const cx = clamp(snap(pt.x - def.w/2), 0, state.width-def.w);
-    const cy = clamp(snap(pt.y - def.h/2), 0, state.depth-def.h);
-    const obj = { id:'o'+(uid++), kind: currentTool, x:cx, y:cy, w:def.w, h:def.h };
-    curFloor().objects.push(obj);
-    selectedId = obj.id;
-    renderProps(); renderCanvas();
-  } else if (currentTool==='furniture' && currentFurniture){
-    const def = FURN_DEF[currentFurniture];
-    const cx = clamp(snap(pt.x - def.w/2), 0, state.width-def.w);
-    const cy = clamp(snap(pt.y - def.h/2), 0, state.depth-def.h);
-    const obj = { id:'o'+(uid++), kind:'furniture', subtype: currentFurniture, x:cx, y:cy, w:def.w, h:def.h };
-    curFloor().objects.push(obj);
-    selectedId = obj.id;
-    renderProps(); renderCanvas();
-  } else {
-    selectedId = null;
-    renderProps(); renderCanvas();
-  }
-});
 
-els.canvasWrap.addEventListener('pointermove', e => {
+  if (currentTool==='room'){
+    const cx=clamp(snap(pt.x),0,state.width), cy=clamp(snap(pt.y),0,state.depth);
+    drawingRoom = { startX:cx, startY:cy }; previewRoom = { x:cx,y:cy,w:0,h:0 };
+  } else if (currentTool==='door' || currentTool==='aircon' || currentTool==='window'){
+    const def = DEFAULTS[currentTool];
+    const cx=clamp(snap(pt.x-def.w/2),0,state.width-def.w), cy=clamp(snap(pt.y-def.h/2),0,state.depth-def.h);
+    const obj = { id:'o'+(uid++), kind:currentTool, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
+    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
+  } else if (currentTool==='furniture' && currentSubtype){
+    const def = DEFAULTS[currentSubtype];
+    const cx=clamp(snap(pt.x-def.w/2),0,state.width-def.w), cy=clamp(snap(pt.y-def.h/2),0,state.depth-def.h);
+    const obj = { id:'o'+(uid++), kind:'furniture', subtype:currentSubtype, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
+    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
+  } else if (currentTool==='point' && currentSubtype){
+    const def = DEFAULTS[currentSubtype];
+    const cx=clamp(snap(pt.x-def.w/2),0,state.width-def.w), cy=clamp(snap(pt.y-def.h/2),0,state.depth-def.h);
+    const kind = state.view==='electrical' ? 'elecPoint' : 'plumbPoint';
+    const obj = { id:'o'+(uid++), kind, subtype:currentSubtype, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
+    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
+  } else {
+    selectedId = null; closeSheet(); renderCanvas();
+  }
+}
+
+function onCanvasMove(e){
+  if (state.view==='elevation3d'){
+    if (!dragging3d) return;
+    const dx=e.clientX-lastX, dy=e.clientY-lastY;
+    theta += dx*0.008;
+    phi = clamp(phi - dy*0.006, 0.3, 1.15);
+    lastX=e.clientX; lastY=e.clientY;
+    renderElevation3D();
+    return;
+  }
   if (movingId){
     const pt = toMeters(e);
     const o = findObj(movingId);
-    if (o){
-      o.x = clamp(snap(pt.x - dragOffset.x), 0, state.width - o.w);
-      o.y = clamp(snap(pt.y - dragOffset.y), 0, state.depth - o.h);
-      renderCanvas();
-    }
+    if (o){ o.x=clamp(snap(pt.x-dragOffset.x),0,state.width-o.w); o.y=clamp(snap(pt.y-dragOffset.y),0,state.depth-o.h); renderCanvas(); }
     return;
   }
   if (resizing){
     const pt = toMeters(e);
     const anchor = resizing.anchor;
-    let px_ = snap(pt.x), py_ = snap(pt.y);
-    if (Math.abs(px_-anchor.x) < 0.9) px_ = anchor.x + (px_>=anchor.x ? 0.9 : -0.9);
-    if (Math.abs(py_-anchor.y) < 0.9) py_ = anchor.y + (py_>=anchor.y ? 0.9 : -0.9);
-    px_ = clamp(px_, 0, state.width); py_ = clamp(py_, 0, state.depth);
+    let px_=snap(pt.x), py_=snap(pt.y);
+    if (Math.abs(px_-anchor.x)<0.9) px_ = anchor.x + (px_>=anchor.x?0.9:-0.9);
+    if (Math.abs(py_-anchor.y)<0.9) py_ = anchor.y + (py_>=anchor.y?0.9:-0.9);
+    px_=clamp(px_,0,state.width); py_=clamp(py_,0,state.depth);
     const room = resizing.room;
-    room.x = Math.min(anchor.x, px_); room.w = Math.abs(px_-anchor.x);
-    room.y = Math.min(anchor.y, py_); room.h = Math.abs(py_-anchor.y);
+    room.x=Math.min(anchor.x,px_); room.w=Math.abs(px_-anchor.x);
+    room.y=Math.min(anchor.y,py_); room.h=Math.abs(py_-anchor.y);
     renderCanvas();
     return;
   }
   if (drawingRoom){
     const pt = toMeters(e);
-    const cx = clamp(snap(pt.x),0,state.width), cy = clamp(snap(pt.y),0,state.depth);
-    previewRoom = {
-      x: Math.min(drawingRoom.startX, cx), y: Math.min(drawingRoom.startY, cy),
-      w: Math.abs(cx-drawingRoom.startX), h: Math.abs(cy-drawingRoom.startY)
-    };
+    const cx=clamp(snap(pt.x),0,state.width), cy=clamp(snap(pt.y),0,state.depth);
+    previewRoom = { x:Math.min(drawingRoom.startX,cx), y:Math.min(drawingRoom.startY,cy), w:Math.abs(cx-drawingRoom.startX), h:Math.abs(cy-drawingRoom.startY) };
     renderCanvas();
   }
-});
+}
 
-window.addEventListener('pointerup', () => {
+function onCanvasUp(){
+  dragging3d = false;
   if (drawingRoom && previewRoom){
-    const w = Math.max(0.9, previewRoom.w), h = Math.max(0.9, previewRoom.h);
-    const obj = { id:'o'+(uid++), kind:'room', x:previewRoom.x, y:previewRoom.y, w, h, type:'other', label: ROOM_LABEL['other'] };
-    curFloor().objects.push(obj);
-    selectedId = obj.id;
+    const w=Math.max(0.9,previewRoom.w), h=Math.max(0.9,previewRoom.h);
+    const obj = { id:'o'+(uid++), kind:'room', x:previewRoom.x, y:previewRoom.y, w, h, type:'other', label:ROOM_LABEL['other'] };
+    curFloor().objects.push(obj); selectedId=obj.id;
   }
-  movingId = null; dragOffset = null; resizing = null; drawingRoom = null; previewRoom = null;
+  movingId=null; dragOffset=null; resizing=null; drawingRoom=null; previewRoom=null;
   renderProps(); renderCanvas();
-});
+}
 
-document.addEventListener('keydown', e => {
-  if ((e.key==='Delete' || e.key==='Backspace') && selectedId){
-    const active = document.activeElement;
-    if (active && (active.tagName==='INPUT' || active.tagName==='SELECT')) return;
+els.canvasWrap.addEventListener('pointerdown', onCanvasDown);
+els.canvasWrap.addEventListener('pointermove', onCanvasMove);
+window.addEventListener('pointerup', onCanvasUp);
+
+document.addEventListener('keydown', e=>{
+  if ((e.key==='Delete'||e.key==='Backspace') && selectedId){
+    const a=document.activeElement;
+    if (a && (a.tagName==='INPUT'||a.tagName==='SELECT')) return;
     deleteSelected();
   }
 });
 
-els.width.addEventListener('input', e => { state.width = parseFloat(e.target.value); els.widthVal.textContent = state.width.toFixed(1); renderCanvas(); });
-els.depth.addEventListener('input', e => { state.depth = parseFloat(e.target.value); els.depthVal.textContent = state.depth.toFixed(1); renderCanvas(); });
+/* ---------------- top-level controls ---------------- */
+els.widthInput.addEventListener('input', e=>{ state.width=clamp(parseFloat(e.target.value)||8,3,30); renderCanvas(); });
+els.depthInput.addEventListener('input', e=>{ state.depth=clamp(parseFloat(e.target.value)||9.5,3,30); renderCanvas(); });
+els.floorsInput.addEventListener('input', e=>{ state.floors=clamp(parseInt(e.target.value)||1,1,4); syncFloors(); buildFloorTabs(); renderCanvas(); });
 
-document.getElementById('clearFloorBtn').onclick = () => {
-  curFloor().objects = []; selectedId = null; renderProps(); renderCanvas();
+document.getElementById('clearBtn').onclick = ()=>{
+  const key = activeArrayKey();
+  curFloor()[key] = [];
+  selectedId=null; closeSheet(); renderCanvas();
 };
 
-document.getElementById('downloadBtn').onclick = () => {
+document.getElementById('downloadBtn').onclick = ()=>{
   const svgEl = els.canvasWrap.querySelector('svg');
   const svgStr = new XMLSerializer().serializeToString(svgEl);
-  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const blob = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const img = new Image();
-  img.onload = () => {
-    const factor = 2;
-    const canvas = document.createElement('canvas');
-    canvas.width = svgEl.viewBox.baseVal.width * factor;
-    canvas.height = svgEl.viewBox.baseVal.height * factor;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#FBF9F3'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  img.onload = ()=>{
+    const factor=2;
+    const canvas=document.createElement('canvas');
+    canvas.width = svgEl.viewBox.baseVal.width*factor;
+    canvas.height = svgEl.viewBox.baseVal.height*factor;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#FBF9F3'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
     URL.revokeObjectURL(url);
-    canvas.toBlob(pngBlob => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(pngBlob);
-      a.download = `ผังบ้าน-ชั้น${state.activeFloor+1}.png`;
-      a.click();
-    });
+    canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`${state.view}-ชั้น${state.activeFloor+1}.png`; a.click(); });
   };
   img.src = url;
 };
 
-buildToolbar();
-buildFloorTabs();
-renderProps();
-renderCanvas();
+/* ---------------- init ---------------- */
+function refreshAll(){ buildViewTabs(); buildFloorTabs(); buildToolbar(); renderProps(); renderCanvas(); }
+refreshAll();
 </script>
 </body>
 </html>
-
