@@ -20,7 +20,8 @@
     font-family:'Sarabun',sans-serif; color:var(--ink); background:var(--paper);
     display:flex; justify-content:center; font-size:15px;
   }
-  .app-frame{ width:100%; max-width:480px; min-height:100vh; display:flex; flex-direction:column; background:var(--paper); position:relative; }
+  .app-frame{ width:100%; max-width:480px; height:100vh; height:100dvh; display:flex; flex-direction:column; background:var(--paper); position:relative; overflow:hidden; }
+  .controls-scroll{ flex:0 0 auto; max-height:34vh; max-height:34dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   header{padding:16px 16px 8px;}
   header .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:600;}
   header h1{margin:5px 0; font-size:21px; font-weight:700; letter-spacing:-.01em;}
@@ -45,7 +46,7 @@
   .floortabs{display:flex; gap:6px; padding:0 14px 8px; overflow-x:auto; align-items:center;}
   .floor-height-row{display:flex; align-items:center; gap:8px; padding:0 14px 10px; font-size:12.5px; color:var(--ink-soft);}
   .floor-height-row input{width:70px; font-family:'Sarabun',sans-serif; border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:14px; text-align:center;}
-  .poly-actions{display:none; gap:8px; padding:0 14px 10px; flex-wrap:wrap;}
+  .poly-actions{display:none; flex-shrink:0; gap:8px; padding:0 14px 10px; flex-wrap:wrap;}
   .poly-actions button{border:none; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:'Sarabun',sans-serif;}
   .poly-actions #polyFinish{background:var(--accent); color:#fff;}
   .poly-actions #polyUndo{background:var(--card); border:1px solid var(--line); color:var(--ink);}
@@ -58,10 +59,10 @@
   .tool-btn{ flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--card); cursor:pointer; font-size:11px; font-weight:500; color:var(--ink); min-width:56px; min-height:48px; }
   .tool-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
-  .canvas-card{ margin:0 14px 10px; background:var(--card); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; flex:1; display:flex; flex-direction:column; position:relative; }
-  .canvas-wrap{flex:1; display:flex; justify-content:center; align-items:center; padding:8px; touch-action:none; min-height:440px; overflow:hidden;}
+  .canvas-card{ margin:0 14px 10px; background:var(--card); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; flex:1; min-height:0; display:flex; flex-direction:column; position:relative; }
+  .canvas-wrap{flex:1; min-height:0; display:flex; justify-content:center; align-items:center; padding:8px; touch-action:none; overflow:hidden;}
   .canvas-wrap svg{max-width:100%; max-height:100%; user-select:none; display:block;}
-  .canvas-hint{font-size:12.5px; color:var(--ink-soft); text-align:center; padding:0 14px 10px; line-height:1.5;}
+  .canvas-hint{flex:0 0 auto; font-size:12.5px; color:var(--ink-soft); text-align:center; padding:0 14px 10px; line-height:1.5;}
 
   .zoom-controls{ position:absolute; right:10px; bottom:10px; display:flex; flex-direction:column; gap:6px; z-index:2; }
   .zoom-controls button{ width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.92); color:var(--ink); font-size:17px; font-weight:600; cursor:pointer; box-shadow:var(--shadow); }
@@ -118,6 +119,7 @@
 </head>
 <body>
 <div class="app-frame">
+  <div class="controls-scroll">
   <header>
     <div class="eyebrow">Freehand House Studio</div>
     <h1>สตูดิโอวางผังบ้าน</h1>
@@ -195,6 +197,7 @@
     <button class="quick-btn primary" id="downloadBtn">⬇️ บันทึก PNG</button>
     <button class="quick-btn" id="furnToggleBtn">🛋️ เฟอร์นิเจอร์</button>
     <button class="quick-btn" id="labelsToggleBtn">🔤 ตัวหนังสือ</button>
+  </div>
   </div>
 
   <div class="canvas-card">
@@ -1324,14 +1327,20 @@ function onCanvasUp(e){
     return;
   }
 
-  if (drawingRoom && previewRoom){
+  const sheetWasOpen = !els.propSheet.classList.contains('closed');
+  const isNewRoom = !!(drawingRoom && previewRoom);
+
+  if (isNewRoom){
     const w=Math.max(0.9,previewRoom.w), h=Math.max(0.9,previewRoom.h);
     const obj = { id:'o'+(uid++), kind:'room', x:previewRoom.x, y:previewRoom.y, w, h, type:'other', label:ROOM_LABEL['other'] };
     curFloor().objects.push(obj); selectedId=obj.id;
   }
-  const hadEdit = movingId || resizing || (drawingRoom && previewRoom);
+  const hadEdit = movingId || resizing || isNewRoom;
   movingId=null; dragOffset=null; resizing=null; drawingRoom=null; previewRoom=null;
-  renderProps(); renderCanvas();
+  // เปิด/รีเฟรชป๊อปอัพขนาด-แก้ไข เฉพาะตอนสร้างห้องใหม่ หรือถ้าป๊อปอัพเปิดอยู่แล้ว (มาจากแตะ 2 ครั้ง)
+  // ไม่เปิดป๊อปอัพเองตอนแค่ลากย้าย หรือลากมุมขยายห้องแบบปกติ
+  if (isNewRoom || sheetWasOpen) renderProps();
+  renderCanvas();
   if (hadEdit) pushHistory();
 }
 
