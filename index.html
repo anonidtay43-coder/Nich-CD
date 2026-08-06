@@ -59,7 +59,7 @@
   .tool-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
   .canvas-card{ margin:0 14px 10px; background:var(--card); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; flex:1; display:flex; flex-direction:column; position:relative; }
-  .canvas-wrap{flex:1; display:flex; justify-content:center; align-items:center; padding:8px; touch-action:none; min-height:360px; overflow:hidden;}
+  .canvas-wrap{flex:1; display:flex; justify-content:center; align-items:center; padding:8px; touch-action:none; min-height:440px; overflow:hidden;}
   .canvas-wrap svg{max-width:100%; max-height:100%; user-select:none; display:block;}
   .canvas-hint{font-size:12.5px; color:var(--ink-soft); text-align:center; padding:0 14px 10px; line-height:1.5;}
 
@@ -103,6 +103,17 @@
   .project-row .prow-actions{display:flex; gap:6px; flex:none;}
   .project-row button{border:none; border-radius:7px; padding:7px 10px; font-size:12px; cursor:pointer; font-family:'Sarabun',sans-serif; font-weight:600;}
   .project-empty{font-size:12.5px; color:var(--ink-soft); padding:8px 2px;}
+
+  .quick-row{display:flex; gap:7px; padding:0 14px 10px; overflow-x:auto;}
+  .quick-btn{flex:none; display:flex; align-items:center; gap:5px; padding:0 12px; height:40px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;}
+  .quick-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .quick-btn.danger{color:#9B3A44; border-color:#E9D3D5;}
+  .quick-btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+  .swatch-row{display:flex; gap:9px; flex-wrap:wrap;}
+  .swatch{width:32px; height:32px; border-radius:50%; border:2px solid var(--line); cursor:pointer; flex:none; padding:0;}
+  .swatch.selected{box-shadow:0 0 0 2px #fff inset, 0 0 0 2px var(--ink);}
+  .swatch.auto{background:conic-gradient(from 0deg,#EFE6D8,#DCE4E3,#E1E5DA,#E5E0E2,#EBE1D6,#DDE4D7,#EFE6D8); font-size:13px; display:flex; align-items:center; justify-content:center;}
 </style>
 </head>
 <body>
@@ -137,7 +148,7 @@
 
   <div class="viewtabs" id="viewTabs"></div>
 
-  <div class="settings-toggle" id="settingsToggle"><span>⚙️ ขนาดที่ดิน / ขนาดบ้าน / จำนวนชั้น</span><span id="settingsChevron">▾</span></div>
+  <div class="settings-toggle" id="settingsToggle"><span>⚙️ ขนาด / ทิศทาง / สี</span><span id="settingsChevron">▾</span></div>
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-group">
       <div class="settings-group-title">📐 ขนาดที่ดิน (ม.) — ระบุครบ 4 ด้าน</div>
@@ -164,6 +175,12 @@
       </div>
       <div class="settings-group-sub" id="northSummary">🧭 ทิศเหนืออยู่ทางด้านหลังของที่ดิน</div>
     </div>
+    <div class="settings-group">
+      <div class="settings-group-title">🎨 สีพื้น &amp; สีผนัง</div>
+      <div class="settings-group-sub">แตะสีที่ต้องการ ใช้กับทั้งบ้าน</div>
+      <div class="field"><label>สีพื้น</label><div class="swatch-row" id="floorColorRow"></div></div>
+      <div class="field" style="margin-top:2px;"><label>สีผนัง</label><div class="swatch-row" id="wallColorRow"></div></div>
+    </div>
   </div>
 
   <div class="floortabs" id="floorTabs"></div>
@@ -172,6 +189,13 @@
     <input type="number" id="floorHeightInput" min="2" max="6" step="0.05" value="3">
   </div>
   <div class="toolbar" id="toolbar"></div>
+
+  <div class="quick-row" id="quickRow">
+    <button class="quick-btn danger" id="clearBtn">🗑️ ล้างชั้นนี้</button>
+    <button class="quick-btn primary" id="downloadBtn">⬇️ บันทึก PNG</button>
+    <button class="quick-btn" id="furnToggleBtn">🛋️ เฟอร์นิเจอร์</button>
+    <button class="quick-btn" id="labelsToggleBtn">🔤 ตัวหนังสือ</button>
+  </div>
 
   <div class="canvas-card">
     <div class="canvas-wrap" id="canvasWrap"></div>
@@ -186,11 +210,6 @@
     <button id="polyFinish">✓ เสร็จ ปิดรูปห้อง</button>
     <button id="polyUndo">↩︎ ลบจุดล่าสุด</button>
     <button id="polyCancel">✕ ยกเลิก</button>
-  </div>
-
-  <div class="foot-actions">
-    <button class="icon-btn" id="clearBtn">ล้างชั้นนี้</button>
-    <button class="download-btn" id="downloadBtn">บันทึกภาพ PNG</button>
   </div>
 </div>
 
@@ -209,7 +228,21 @@ const FLOOR_H = 3;
 let uid = 1;
 
 const state = { width:7, depth:10, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
-  land:{ front:11, back:11, left:15, right:15 }, frontFacing:0, northSide:'back', houseOffset:null };
+  land:{ front:11, back:11, left:15, right:15 }, frontFacing:0, northSide:'back', houseOffset:null,
+  floorColor:null, wallColor:'#221F1B', showFurniture:true, showLabels:true };
+
+const PALETTE_COLORS = [
+  {v:'#FFFFFF', name:'ขาว'}, {v:'#FBEEDA', name:'ครีมไข่'}, {v:'#B98A5E', name:'น้ำตาล'},
+  {v:'#BFE0EF', name:'ฟ้าอ่อน'}, {v:'#2F5C99', name:'น้ำเงิน'}, {v:'#F5C08C', name:'ส้มอ่อน'},
+];
+function roomFill(type){ return state.floorColor || ROOM_COLOR[type] || '#EAE7E0'; }
+function wallStroke(){ return state.wallColor || '#221F1B'; }
+function backfillStateDefaults(){
+  if (state.floorColor===undefined) state.floorColor=null;
+  if (state.wallColor===undefined) state.wallColor='#221F1B';
+  if (state.showFurniture===undefined) state.showFurniture=true;
+  if (state.showLabels===undefined) state.showLabels=true;
+}
 let HOUSE_OFFSET = { x:0, y:0 };
 let floorsData = [ mkFloor() ];
 function mkFloor(){ return { objects:[], electrical:[], plumbing:[], scribbles:[], height:3 }; }
@@ -299,6 +332,8 @@ const els = {
   projectsToggle: document.getElementById('projectsToggle'), projectsPanel: document.getElementById('projectsPanel'), projectsList: document.getElementById('projectsList'),
   saveProjectBtn: document.getElementById('saveProjectBtn'), newProjectBtn: document.getElementById('newProjectBtn'),
   exportProjectBtn: document.getElementById('exportProjectBtn'), importProjectBtn: document.getElementById('importProjectBtn'), importProjectFile: document.getElementById('importProjectFile'),
+  furnToggleBtn: document.getElementById('furnToggleBtn'), labelsToggleBtn: document.getElementById('labelsToggleBtn'),
+  floorColorRow: document.getElementById('floorColorRow'), wallColorRow: document.getElementById('wallColorRow'),
 };
 
 function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
@@ -390,12 +425,12 @@ function buildToolbar(){
 }
 
 function updateHint(){
-  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากเพื่อหมุนดูรอบบ้าน (ไม่มีหลังคา เห็นห้อง/เฟอร์นิเจอร์ข้างในแบบจำลองย่อ) · จีบสองนิ้ว/เมาส์ล้อเพื่อซูม'; return; }
-  if (currentTool==='room') els.canvasHint.textContent = 'ลากบนผังเพื่อวาดห้อง · จีบสองนิ้วเพื่อซูม';
-  else if (currentTool==='freeroom') els.canvasHint.textContent = 'แตะทีละจุดเพื่อวาดขอบห้อง (ไม่ต้องเป็นสี่เหลี่ยม) แล้วแตะจุดเริ่มต้นหรือปุ่ม "เสร็จ" เพื่อปิดรูป';
-  else if (currentTool==='pen') els.canvasHint.textContent = 'ลากค้างเพื่อวาดเส้นโน้ต/อธิบายแบบด้วยมือ เหมือนเขียนบนกระดาษ';
-  else if (currentTool==='wire') els.canvasHint.textContent = 'แตะจุดแรก แล้วแตะจุดที่สองเพื่อลากเส้นเชื่อม';
-  else if (currentTool==='select') els.canvasHint.textContent = 'แตะค้างแล้วลากเพื่อย้ายวัตถุ · แตะ 2 ครั้งเพื่อแก้ไข/ลบ · กดค้างพื้นที่ว่างในกรอบบ้านเพื่อย้ายทั้งบ้าน · ลากพื้นที่ว่างนอกบ้านเพื่อเลื่อนมุมมอง';
+  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากหมุนดูรอบบ้าน · จีบนิ้ว/เมาส์ล้อซูม'; return; }
+  if (currentTool==='room') els.canvasHint.textContent = 'ลากวาดห้อง · จีบนิ้วเพื่อซูม';
+  else if (currentTool==='freeroom') els.canvasHint.textContent = 'แตะทีละจุดวาดขอบห้อง แล้วกด "เสร็จ"';
+  else if (currentTool==='pen') els.canvasHint.textContent = 'ลากค้างเพื่อวาดเส้นโน้ตด้วยมือ';
+  else if (currentTool==='wire') els.canvasHint.textContent = 'แตะจุดแรก แล้วแตะจุดที่สอง';
+  else if (currentTool==='select') els.canvasHint.textContent = 'ลากย้ายวัตถุ · แตะ 2 ครั้งแก้ไข/ลบ · กดค้างในบ้านเพื่อย้ายทั้งหลัง';
   else els.canvasHint.textContent = 'แตะบนผังเพื่อวางตำแหน่ง';
 }
 
@@ -574,6 +609,38 @@ function handles(o){
   }).join('');
 }
 
+/* ---------------- dimension lines (dashed, with arrowheads + numbers) ---------------- */
+function fmtDim(m){ return m.toFixed(2)+'m'; }
+function dimArrow(x,y,dx,dy,size){
+  size = size||5;
+  const nx=-dy, ny=dx;
+  const tipX=x+dx*size, tipY=y+dy*size;
+  const b1x=x-nx*size*0.42, b1y=y-ny*size*0.42;
+  const b2x=x+nx*size*0.42, b2y=y+ny*size*0.42;
+  return `<polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${b1x.toFixed(1)},${b1y.toFixed(1)} ${b2x.toFixed(1)},${b2y.toFixed(1)}" fill="#6E675C"/>`;
+}
+// horizontal dimension: edge at edgeYPx, dim line drawn at dimYPx (can be above or below edge), spanning x1..x2 (px)
+function drawHDim(x1,x2,edgeYPx,dimYPx,label){
+  let s = `<line x1="${x1.toFixed(1)}" y1="${edgeYPx.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${dimYPx.toFixed(1)}" stroke="#B4AC9C" stroke-width="1" stroke-dasharray="2 2"/>`;
+  s += `<line x1="${x2.toFixed(1)}" y1="${edgeYPx.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${dimYPx.toFixed(1)}" stroke="#B4AC9C" stroke-width="1" stroke-dasharray="2 2"/>`;
+  s += `<line x1="${x1.toFixed(1)}" y1="${dimYPx.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${dimYPx.toFixed(1)}" stroke="#6E675C" stroke-width="1.1" stroke-dasharray="5 3"/>`;
+  s += dimArrow(x1,dimYPx,-1,0) + dimArrow(x2,dimYPx,1,0);
+  const textY = dimYPx < edgeYPx ? dimYPx-4 : dimYPx+13;
+  s += `<text x="${((x1+x2)/2).toFixed(1)}" y="${textY.toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#4A463C" font-family="Sarabun,sans-serif">${label}</text>`;
+  return s;
+}
+// vertical dimension: edge at edgeXPx, dim line drawn at dimXPx, spanning y1..y2 (px)
+function drawVDim(y1,y2,edgeXPx,dimXPx,label){
+  let s = `<line x1="${edgeXPx.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${dimXPx.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="#B4AC9C" stroke-width="1" stroke-dasharray="2 2"/>`;
+  s += `<line x1="${edgeXPx.toFixed(1)}" y1="${y2.toFixed(1)}" x2="${dimXPx.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#B4AC9C" stroke-width="1" stroke-dasharray="2 2"/>`;
+  s += `<line x1="${dimXPx.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${dimXPx.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#6E675C" stroke-width="1.1" stroke-dasharray="5 3"/>`;
+  s += dimArrow(dimXPx,y1,0,-1) + dimArrow(dimXPx,y2,0,1);
+  const midY = (y1+y2)/2;
+  const textX = dimXPx < edgeXPx ? dimXPx-6 : dimXPx+6;
+  const anchor = dimXPx < edgeXPx ? 'end' : 'start';
+  s += `<text x="${textX.toFixed(1)}" y="${(midY+3.5).toFixed(1)}" text-anchor="${anchor}" font-size="10.5" font-weight="700" fill="#4A463C" font-family="Sarabun,sans-serif" transform="rotate(-90 ${textX.toFixed(1)} ${(midY+3.5).toFixed(1)})">${label}</text>`;
+  return s;
+}
 function polyArea(pts){
   let a=0;
   for (let i=0;i<pts.length;i++){ const p1=pts[i], p2=pts[(i+1)%pts.length]; a += p1.x*p2.y - p2.x*p1.y; }
@@ -581,17 +648,24 @@ function polyArea(pts){
 }
 function drawRoom(o, sel){
   let s = `<g data-id="${o.id}">`;
+  const stroke = wallStroke();
   if (o.poly && o.poly.length>=3){
     const pts = o.poly.map(p=>`${wx(p.x).toFixed(1)},${wy(p.y).toFixed(1)}`).join(' ');
     const cx = o.poly.reduce((a,p)=>a+p.x,0)/o.poly.length, cy = o.poly.reduce((a,p)=>a+p.y,0)/o.poly.length;
-    s += `<polygon points="${pts}" fill="${ROOM_COLOR[o.type]}" stroke="#221F1B" stroke-width="2.5"/>`;
-    s += `<text x="${wx(cx)}" y="${wy(cy)-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
-    s += `<text x="${wx(cx)}" y="${wy(cy)+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${polyArea(o.poly).toFixed(1)} ตร.ม.</text>`;
+    s += `<polygon points="${pts}" fill="${roomFill(o.type)}" stroke="${stroke}" stroke-width="2.5"/>`;
+    if (state.showLabels){
+      s += `<text x="${wx(cx)}" y="${wy(cy)-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
+      s += `<text x="${wx(cx)}" y="${wy(cy)+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${polyArea(o.poly).toFixed(1)} ตร.ม.</text>`;
+    }
   } else {
     const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
-    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#221F1B" stroke-width="2.5"/>`;
-    s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
-    s += `<text x="${x+w/2}" y="${y+h/2+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${roomFill(o.type)}" stroke="${stroke}" stroke-width="2.5"/>`;
+    if (state.showLabels){
+      s += `<text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" font-size="13.5" font-weight="600" fill="#221F1B">${o.label}</text>`;
+      // dashed dimension line + number along the width (top edge) and along the depth (left edge)
+      if (w > 46) s += drawHDim(x+3, x+w-3, y, y+14, fmtDim(o.w));
+      if (h > 46) s += drawVDim(y+3, y+h-3, x, x+14, fmtDim(o.h));
+    }
   }
   s += `</g>`;
   if (sel) s += selOutline(o) + (o.poly ? '' : handles(o));
@@ -599,8 +673,9 @@ function drawRoom(o, sel){
 }
 function drawRoomBackdrop(o){
   const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#F1EEE7" stroke="#DAD3C4" stroke-width="1.5"/>
-          <text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" font-size="11" fill="#B4AC9C">${o.label}</text>`;
+  let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#F1EEE7" stroke="#DAD3C4" stroke-width="1.5"/>`;
+  if (state.showLabels) s += `<text x="${x+w/2}" y="${y+h/2}" text-anchor="middle" font-size="11" fill="#B4AC9C">${o.label}</text>`;
+  return s;
 }
 
 /* proper architectural door symbol: threshold + open leaf + dashed swing arc */
@@ -652,7 +727,7 @@ function drawFurniture(o, sel){
     case 'car': inner = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w*0.18}" fill="#c9d3da" stroke="#221F1B" stroke-width="1.8"/><rect x="${x+w*0.12}" y="${y+h*0.12}" width="${w*0.76}" height="${h*0.22}" fill="#7fa0b5"/>`; break;
   }
   let s = rotWrap(o, inner);
-  s += `<text x="${wx(o.x+o.w/2)}" y="${wy(o.y+o.h)+11}" text-anchor="middle" font-size="9.5" fill="#6E675C">${DEFAULTS[o.subtype].label}</text>`;
+  if (state.showLabels) s += `<text x="${wx(o.x+o.w/2)}" y="${wy(o.y+o.h)+11}" text-anchor="middle" font-size="9.5" fill="#6E675C">${DEFAULTS[o.subtype].label}</text>`;
   if (sel) s += selOutline(o) + handles(o);
   return s;
 }
@@ -707,7 +782,11 @@ function renderCanvas(){
   const houseStroke = movingHouse ? cssVar('--accent') : '#CDC5B2';
   const houseFill = movingHouse ? 'rgba(124,48,72,0.06)' : 'none';
   s += `<rect x="${wx(0)}" y="${wy(0)}" width="${px(W)}" height="${px(D)}" fill="${houseFill}" stroke="${houseStroke}" stroke-width="${movingHouse?2.2:1.5}" stroke-dasharray="5 4"/>`;
-  s += `<text x="${wx(W/2)}" y="${wy(0)-10}" text-anchor="middle" font-size="13" font-weight="700" fill="${cssVar('--accent')}" font-family="Sarabun,sans-serif">บ้านกว้าง ${W.toFixed(1)}×${D.toFixed(1)} ม. · ทิศเหนืออยู่ทาง${northSideLabel()}ที่ดิน</text>`;
+  if (state.showLabels){
+    s += drawHDim(wx(0), wx(W), wy(0), wy(0)-18, fmtDim(W));
+    s += drawVDim(wy(0), wy(D), wx(0), wx(0)-18, fmtDim(D));
+    s += `<text x="${wx(W/2)}" y="${wy(0)-32}" text-anchor="middle" font-size="11.5" font-weight="600" fill="${cssVar('--accent')}" font-family="Sarabun,sans-serif">ทิศเหนืออยู่ทาง${northSideLabel()}ที่ดิน</text>`;
+  }
 
   const f = curFloor();
   if (state.view==='plan2d'){
@@ -716,7 +795,7 @@ function renderCanvas(){
       if (o.kind==='door') s+=drawDoor(o,o.id===selectedId);
       else if (o.kind==='window') s+=drawWindow(o,o.id===selectedId);
       else if (o.kind==='aircon') s+=drawAircon(o,o.id===selectedId);
-      else if (o.kind==='furniture') s+=drawFurniture(o,o.id===selectedId);
+      else if (o.kind==='furniture' && state.showFurniture) s+=drawFurniture(o,o.id===selectedId);
     });
     if (previewRoom){
       const x=wx(previewRoom.x), y=wy(previewRoom.y), w=px(previewRoom.w), h=px(previewRoom.h);
@@ -828,7 +907,7 @@ function renderElevation3D(){
   projScale = 30*zoom3d;
   const W=state.width, D=state.depth;
   const hw=W/2, hd=D/2;
-  const color = state.houseColor;
+  const color = state.wallColor || state.houseColor;
   const WALL_H = 1.15; // low cutaway wall per floor so the room layout inside stays visible ("dollhouse" view)
 
   const P = (x,y,z)=>project(x,y,z);
@@ -868,16 +947,16 @@ function renderElevation3D(){
     (floor.objects||[]).filter(o=>o.kind==='room').forEach(o=>{
       if (o.poly && o.poly.length>=3){
         const pts3d = o.poly.map(p=>P(p.x-hw, yBase+0.03, p.y-hd));
-        items.push({ depth: avgDepth(pts3d)-0.01, svg: poly(pts3d, ROOM_COLOR[o.type]||'#EAE7E0') });
+        items.push({ depth: avgDepth(pts3d)-0.01, svg: poly(pts3d, roomFill(o.type)) });
         return;
       }
       const x0=o.x-hw, z0=o.y-hd;
       const p1=P(x0,yBase+0.03,z0), p2=P(x0+o.w,yBase+0.03,z0), p3=P(x0+o.w,yBase+0.03,z0+o.h), p4=P(x0,yBase+0.03,z0+o.h);
-      items.push({ depth: avgDepth([p1,p2,p3,p4])-0.01, svg: poly([p1,p2,p3,p4], ROOM_COLOR[o.type]||'#EAE7E0') });
+      items.push({ depth: avgDepth([p1,p2,p3,p4])-0.01, svg: poly([p1,p2,p3,p4], roomFill(o.type)) });
     });
 
     // furniture — small miniature 3D blocks so the inside reads like a dollhouse
-    (floor.objects||[]).filter(o=>o.kind==='furniture' && FURN_3D[o.subtype]).forEach(o=>{
+    (floor.objects||[]).filter(o=>o.kind==='furniture' && FURN_3D[o.subtype] && state.showFurniture).forEach(o=>{
       const def = FURN_3D[o.subtype];
       drawBox3D(P, items, o.x-hw, o.y-hd, o.w, o.h, def.h, yBase+0.03, def.c);
     });
@@ -885,7 +964,7 @@ function renderElevation3D(){
 
   // trees & cars placed on the ground floor plan
   const groundObjs = (floorsData[0] && floorsData[0].objects) || [];
-  groundObjs.filter(o=>o.kind==='furniture' && (o.subtype==='tree'||o.subtype==='car')).forEach(o=>{
+  groundObjs.filter(o=>o.kind==='furniture' && (o.subtype==='tree'||o.subtype==='car') && state.showFurniture).forEach(o=>{
     const worldX = (o.x+o.w/2) - hw, worldZ = (o.y+o.h/2) - hd;
     const base = P(worldX,0,worldZ);
     const isTree = o.subtype==='tree';
@@ -1385,6 +1464,7 @@ function restoreSnapshot(snap){
   restoringHistory = true;
   Object.keys(state).forEach(k=>delete state[k]);
   Object.assign(state, data.state);
+  backfillStateDefaults();
   floorsData = data.floorsData;
   if (state.activeFloor >= floorsData.length) state.activeFloor = floorsData.length-1;
   selectedId = null; closeSheet();
@@ -1407,12 +1487,33 @@ window.addEventListener('keydown', e=>{
   else if ((e.ctrlKey||e.metaKey) && (e.key.toLowerCase()==='y' || (e.shiftKey && e.key.toLowerCase()==='z'))){ e.preventDefault(); redo(); }
 });
 
+function renderColorSwatches(){
+  els.floorColorRow.innerHTML = `<button type="button" class="swatch auto${!state.floorColor?' selected':''}" data-v="" title="ตามประเภทห้อง (ค่าเริ่มต้น)">↺</button>` +
+    PALETTE_COLORS.map(c=>`<button type="button" class="swatch${state.floorColor===c.v?' selected':''}" style="background:${c.v};" data-v="${c.v}" title="${c.name}"></button>`).join('');
+  els.wallColorRow.innerHTML = PALETTE_COLORS.concat([{v:'#221F1B',name:'เข้ม (ค่าเริ่มต้น)'}]).map(c=>`<button type="button" class="swatch${(state.wallColor||'#221F1B')===c.v?' selected':''}" style="background:${c.v};" data-v="${c.v}" title="${c.name}"></button>`).join('');
+  els.floorColorRow.querySelectorAll('.swatch').forEach(btn=>{
+    btn.onclick = ()=>{ state.floorColor = btn.dataset.v || null; renderColorSwatches(); renderCanvas(); pushHistory(); };
+  });
+  els.wallColorRow.querySelectorAll('.swatch').forEach(btn=>{
+    btn.onclick = ()=>{ state.wallColor = btn.dataset.v || '#221F1B'; renderColorSwatches(); renderCanvas(); pushHistory(); };
+  });
+}
+function updateQuickToggles(){
+  els.furnToggleBtn.classList.toggle('active', !state.showFurniture);
+  els.furnToggleBtn.textContent = state.showFurniture ? '🛋️ เฟอร์นิเจอร์' : '🛋️ ซ่อนเฟอร์นิเจอร์';
+  els.labelsToggleBtn.classList.toggle('active', !state.showLabels);
+  els.labelsToggleBtn.textContent = state.showLabels ? '🔤 ตัวหนังสือ' : '🔤 ซ่อนตัวหนังสือ';
+}
+els.furnToggleBtn.addEventListener('click', ()=>{ state.showFurniture=!state.showFurniture; updateQuickToggles(); renderCanvas(); pushHistory(); });
+els.labelsToggleBtn.addEventListener('click', ()=>{ state.showLabels=!state.showLabels; updateQuickToggles(); renderCanvas(); pushHistory(); });
+
 function syncSettingsInputsFromState(){
   els.widthInput.value = state.width; els.depthInput.value = state.depth; els.floorsInput.value = state.floors;
   els.landFrontInput.value = state.land.front; els.landBackInput.value = state.land.back;
   els.landLeftInput.value = state.land.left; els.landRightInput.value = state.land.right;
   els.frontFacingInput.value = state.northSide || 'back';
   els.northSummary.textContent = `🧭 ทิศเหนืออยู่ทาง${northSideLabel()}ของที่ดิน`;
+  renderColorSwatches(); updateQuickToggles();
   buildFloorTabs(); buildToolbar();
 }
 
@@ -1464,6 +1565,7 @@ async function loadProject(id){
     currentProjectId = id;
     Object.keys(state).forEach(k=>delete state[k]);
     Object.assign(state, payload.state);
+    backfillStateDefaults();
     floorsData = payload.floorsData;
     if (state.activeFloor>=floorsData.length) state.activeFloor=0;
     els.projectNameInput.value = payload.name||'';
@@ -1512,7 +1614,8 @@ function newProject(){
   Object.keys(state).forEach(k=>delete state[k]);
   Object.assign(state, {
     width:8, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
-    land:{ front:12, back:12, left:16, right:16 }, frontFacing:0, northSide:'back', houseOffset:null
+    land:{ front:12, back:12, left:16, right:16 }, frontFacing:0, northSide:'back', houseOffset:null,
+    floorColor:null, wallColor:'#221F1B', showFurniture:true, showLabels:true
   });
   floorsData = [ mkFloor() ];
   els.projectNameInput.value = 'โครงการใหม่';
@@ -1548,6 +1651,7 @@ els.importProjectFile.addEventListener('change', e=>{
       currentProjectId = null;
       Object.keys(state).forEach(k=>delete state[k]);
       Object.assign(state, payload.state);
+      backfillStateDefaults();
       floorsData = payload.floorsData;
       if (state.activeFloor>=floorsData.length) state.activeFloor=0;
       els.projectNameInput.value = payload.name||'โครงการที่นำเข้า';
