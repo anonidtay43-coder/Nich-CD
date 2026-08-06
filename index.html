@@ -30,10 +30,17 @@
   .viewtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
   .settings-toggle{ margin:0 14px 8px; padding:10px 12px; border-radius:10px; background:var(--card); border:1px solid var(--line); font-size:13.5px; font-weight:600; color:var(--ink-soft); display:flex; justify-content:space-between; align-items:center; cursor:pointer; min-height:44px; }
-  .settings-panel{ margin:0 14px 8px; padding:12px; border-radius:10px; background:var(--card); box-shadow:var(--shadow); display:none; gap:10px; }
-  .settings-panel.open{display:grid; grid-template-columns:1fr 1fr 1fr;}
+  .settings-panel{ margin:0 14px 8px; padding:14px; border-radius:10px; background:var(--card); box-shadow:var(--shadow); display:none; flex-direction:column; gap:14px; }
+  .settings-panel.open{display:flex;}
+  .settings-group{ display:flex; flex-direction:column; gap:8px; }
+  .settings-group + .settings-group{ padding-top:12px; border-top:1px dashed var(--line); }
+  .settings-group-title{ font-size:11.5px; font-weight:700; color:var(--ink); letter-spacing:.01em; display:flex; align-items:center; gap:5px; }
+  .settings-group-sub{ font-size:11px; color:var(--ink-soft); margin-top:-4px; }
+  .settings-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .settings-grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
   .settings-panel .field label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:4px;}
   .settings-panel input[type=number]{ width:100%; font-family:'JetBrains Mono',monospace; border:1px solid var(--line); border-radius:8px; padding:9px 4px; font-size:16px; text-align:center; }
+  .settings-panel select{ width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 6px; font-size:14px; font-family:'Sarabun',sans-serif; background:#fff; color:var(--ink); }
 
   .floortabs{display:flex; gap:6px; padding:0 14px 8px; overflow-x:auto; align-items:center;}
   .tab{padding:7px 13px; border-radius:16px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); flex:none;}
@@ -85,11 +92,32 @@
 
   <div class="viewtabs" id="viewTabs"></div>
 
-  <div class="settings-toggle" id="settingsToggle"><span>⚙️ ขนาดที่ดิน / จำนวนชั้น</span><span id="settingsChevron">▾</span></div>
+  <div class="settings-toggle" id="settingsToggle"><span>⚙️ ขนาดที่ดิน / ขนาดบ้าน / จำนวนชั้น</span><span id="settingsChevron">▾</span></div>
   <div class="settings-panel" id="settingsPanel">
-    <div class="field"><label>กว้าง (ม.)</label><input type="number" id="widthInput" min="3" max="30" step="0.1" value="8"></div>
-    <div class="field"><label>ลึก (ม.)</label><input type="number" id="depthInput" min="3" max="30" step="0.1" value="9.5"></div>
-    <div class="field"><label>จำนวนชั้น</label><input type="number" id="floorsInput" min="1" max="4" step="1" value="1"></div>
+    <div class="settings-group">
+      <div class="settings-group-title">📐 ขนาดที่ดิน (ม.) — ระบุครบ 4 ด้าน</div>
+      <div class="settings-group-sub">ที่ดินแต่ละแปลงไม่เป็นสี่เหลี่ยมผืนผ้าเท่ากัน ใส่ให้ตรงหน้างานจริง</div>
+      <div class="settings-grid">
+        <div class="field"><label>ด้านหน้า (ม.)</label><input type="number" id="landFrontInput" min="3" max="80" step="0.1" value="12"></div>
+        <div class="field"><label>ด้านหลัง (ม.)</label><input type="number" id="landBackInput" min="3" max="80" step="0.1" value="12"></div>
+        <div class="field"><label>ด้านซ้าย (ม.)</label><input type="number" id="landLeftInput" min="3" max="80" step="0.1" value="16"></div>
+        <div class="field"><label>ด้านขวา (ม.)</label><input type="number" id="landRightInput" min="3" max="80" step="0.1" value="16"></div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">🏠 ขนาดตัวบ้าน (ม.) — ใช้วาดขนาดห้อง</div>
+      <div class="settings-grid-3">
+        <div class="field"><label>กว้าง (ม.)</label><input type="number" id="widthInput" min="3" max="30" step="0.1" value="8"></div>
+        <div class="field"><label>ยาว (ม.)</label><input type="number" id="depthInput" min="3" max="30" step="0.1" value="9.5"></div>
+        <div class="field"><label>จำนวนชั้น</label><input type="number" id="floorsInput" min="1" max="4" step="1" value="1"></div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">🧭 ทิศทางของบ้าน</div>
+      <div class="field"><label>ด้านหน้าบ้านหันไปทาง</label>
+        <select id="frontFacingInput"></select>
+      </div>
+    </div>
   </div>
 
   <div class="floortabs" id="floorTabs"></div>
@@ -125,7 +153,9 @@ const MARGIN = { top:34, right:34, bottom:34, left:34 };
 const FLOOR_H = 3;
 let uid = 1;
 
-const state = { width:8, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D8C7A6' };
+const state = { width:8, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
+  land:{ front:12, back:12, left:16, right:16 }, frontFacing:0, houseOffset:null };
+let HOUSE_OFFSET = { x:0, y:0 };
 let floorsData = [ mkFloor() ];
 function mkFloor(){ return { objects:[], electrical:[], plumbing:[] }; }
 
@@ -135,6 +165,8 @@ let selectedId = null;
 let wireStart = null;
 
 let movingId=null, dragOffset=null, resizing=null, drawingRoom=null, previewRoom=null;
+let movingHouse=false, houseMoveTimer=null, houseDragStartInternal=null, houseDragOffsetStart=null;
+let lastTap = { id:null, time:0 };
 let viewport = { x:0, y:0, zoom:1 };
 
 let theta = Math.PI/4, phi = 0.6, dragging3d=false, lastX=0, lastY=0, zoom3d=1, projScale=30;
@@ -150,6 +182,13 @@ const ROOM_TYPES = [
   {key:'garage',label:'ที่จอดรถ',color:'#E3E1DC'}, {key:'other',label:'พื้นที่อื่นๆ',color:'#EAE7E0'},
 ];
 const ROOM_COLOR={}, ROOM_LABEL={}; ROOM_TYPES.forEach(t=>{ROOM_COLOR[t.key]=t.color; ROOM_LABEL[t.key]=t.label;});
+
+const DIRS8 = [
+  {v:0, label:'เหนือ (N)'}, {v:45, label:'ตะวันออกเฉียงเหนือ (NE)'}, {v:90, label:'ตะวันออก (E)'},
+  {v:135, label:'ตะวันออกเฉียงใต้ (SE)'}, {v:180, label:'ใต้ (S)'}, {v:225, label:'ตะวันตกเฉียงใต้ (SW)'},
+  {v:270, label:'ตะวันตก (W)'}, {v:315, label:'ตะวันตกเฉียงเหนือ (NW)'},
+];
+function dirLabelFor(v){ const d=DIRS8.find(d=>d.v===v); return d?d.label:'เหนือ (N)'; }
 
 const DEFAULTS = {
   door:{w:.9,h:.9,min:.5,label:'ประตู'}, window:{w:1.2,h:.15,min:.15,label:'หน้าต่าง'}, aircon:{w:.8,h:.25,min:.2,label:'แอร์'},
@@ -167,6 +206,9 @@ const els = {
   canvasHint: document.getElementById('canvasHint'),
   propSheet: document.getElementById('propSheet'), propBody: document.getElementById('propBody'), sheetBackdrop: document.getElementById('sheetBackdrop'),
   widthInput: document.getElementById('widthInput'), depthInput: document.getElementById('depthInput'), floorsInput: document.getElementById('floorsInput'),
+  landFrontInput: document.getElementById('landFrontInput'), landBackInput: document.getElementById('landBackInput'),
+  landLeftInput: document.getElementById('landLeftInput'), landRightInput: document.getElementById('landRightInput'),
+  frontFacingInput: document.getElementById('frontFacingInput'),
   settingsToggle: document.getElementById('settingsToggle'), settingsPanel: document.getElementById('settingsPanel'), settingsChevron: document.getElementById('settingsChevron'),
 };
 
@@ -254,10 +296,10 @@ function buildToolbar(){
 }
 
 function updateHint(){
-  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากเพื่อหมุนดูรอบบ้าน · จีบสองนิ้ว/เมาส์ล้อเพื่อซูม'; return; }
+  if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากเพื่อหมุนดูรอบบ้าน (ไม่มีหลังคา เห็นห้อง/เฟอร์นิเจอร์ข้างในแบบจำลองย่อ) · จีบสองนิ้ว/เมาส์ล้อเพื่อซูม'; return; }
   if (currentTool==='room') els.canvasHint.textContent = 'ลากบนผังเพื่อวาดห้อง · จีบสองนิ้วเพื่อซูม';
   else if (currentTool==='wire') els.canvasHint.textContent = 'แตะจุดแรก แล้วแตะจุดที่สองเพื่อลากเส้นเชื่อม';
-  else if (currentTool==='select') els.canvasHint.textContent = 'แตะวัตถุเพื่อย้าย · ลากพื้นที่ว่างเพื่อเลื่อนมุมมอง · จีบสองนิ้วเพื่อซูม';
+  else if (currentTool==='select') els.canvasHint.textContent = 'แตะค้างแล้วลากเพื่อย้ายวัตถุ · แตะ 2 ครั้งเพื่อแก้ไข/ลบ · กดค้างพื้นที่ว่างในกรอบบ้านเพื่อย้ายทั้งบ้าน · ลากพื้นที่ว่างนอกบ้านเพื่อเลื่อนมุมมอง';
   else els.canvasHint.textContent = 'แตะบนผังเพื่อวางตำแหน่ง';
 }
 
@@ -281,7 +323,7 @@ function renderProps(){
       <select id="pType">${opts}</select>
       <div class="num-row">
         <div class="num-field"><label>กว้าง (ม.)</label><input type="number" id="pW" step="0.1" min="0.9" value="${o.w.toFixed(2)}"></div>
-        <div class="num-field"><label>ลึก (ม.)</label><input type="number" id="pH" step="0.1" min="0.9" value="${o.h.toFixed(2)}"></div>
+        <div class="num-field"><label>ยาว (ม.)</label><input type="number" id="pH" step="0.1" min="0.9" value="${o.h.toFixed(2)}"></div>
       </div>
       <div class="btn-row"><button class="act btn-delete" id="pDel">ลบห้องนี้</button></div>
     `;
@@ -365,8 +407,43 @@ function svgOpenViewBox(pxW,pxH){
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewport.x.toFixed(1)} ${viewport.y.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" width="${pxW}" height="${pxH}">`;
 }
 function px(m){ return m*SCALE; }
-function wx(m){ return MARGIN.left+px(m); }
-function wy(m){ return MARGIN.top+px(m); }
+function wx(m){ return MARGIN.left+px(m+HOUSE_OFFSET.x); }
+function wy(m){ return MARGIN.top+px(m+HOUSE_OFFSET.y); }
+function lx(m){ return MARGIN.left+px(m); } // land-space x, no house offset
+function ly(m){ return MARGIN.top+px(m); }
+
+/* ---------------- land plot geometry (4 sides, meters) ---------------- */
+// Assumes front & back edges are horizontal/parallel (standard for house-plan sketches);
+// left/right are the two connecting sides. Returns a quadrilateral matching all 4 given lengths.
+function landGeom(){
+  const Wf = Math.max(1, state.land.front), Wb = Math.max(1, state.land.back);
+  const Ll = Math.max(1, state.land.left), Rr = Math.max(1, state.land.right);
+  const k = Wb - Wf;
+  let bx, H;
+  if (Math.abs(k) < 1e-6){
+    bx = 0; H = (Ll+Rr)/2;
+  } else {
+    bx = (Rr*Rr - Ll*Ll - k*k) / (2*k);
+    const h2 = Ll*Ll - bx*bx;
+    H = h2 > 1 ? Math.sqrt(h2) : (Ll+Rr)/2*0.85;
+  }
+  H = Math.max(H, 2);
+  let pts = [ {x:0,y:0}, {x:Wf,y:0}, {x:bx+Wb,y:H}, {x:bx,y:H} ]; // frontL, frontR, backR, backL
+  const minX = Math.min(...pts.map(p=>p.x));
+  if (minX < 0) pts = pts.map(p=>({x:p.x-minX, y:p.y}));
+  const maxX = Math.max(...pts.map(p=>p.x));
+  return { pts, width:maxX, depth:H };
+}
+function computeHouseOffset(land){
+  if (state.houseOffset){
+    const maxX = Math.max(0, land.width-state.width*0.3), maxY = Math.max(0, land.depth-state.depth*0.3);
+    return { x: clamp(state.houseOffset.x, -state.width*0.7, maxX+state.width*0.4), y: clamp(state.houseOffset.y, -state.depth*0.5, maxY+state.depth*0.4) };
+  }
+  const setback = clamp(land.depth*0.12, 1, 2.5);
+  const ox = clamp((land.width-state.width)/2, 0, Math.max(0, land.width-state.width));
+  const oy = setback;
+  return { x:ox, y:oy };
+}
 
 function rotWrap(o, inner){
   const cx = wx(o.x+o.w/2), cy = wy(o.y+o.h/2);
@@ -481,11 +558,31 @@ function renderCanvas(){
   buildFloorTabs();
   if (state.view==='elevation3d'){ renderElevation3D(); return; }
   const W=state.width, D=state.depth;
-  const pxW = px(W)+MARGIN.left+MARGIN.right, pxH = px(D)+MARGIN.top+MARGIN.bottom;
+  const land = landGeom();
+  HOUSE_OFFSET = computeHouseOffset(land);
+  const totalW = Math.max(land.width, HOUSE_OFFSET.x+W);
+  const totalH = Math.max(land.depth, HOUSE_OFFSET.y+D);
+  const pxW = px(totalW)+MARGIN.left+MARGIN.right, pxH = px(totalH)+MARGIN.top+MARGIN.bottom;
   let s = svgOpenViewBox(pxW,pxH);
   s += `<rect x="${(viewport.x-2000).toFixed(1)}" y="${(viewport.y-2000).toFixed(1)}" width="4000" height="4000" fill="#FBF9F4"/>`;
-  s += `<rect x="${MARGIN.left}" y="${MARGIN.top}" width="${px(W)}" height="${px(D)}" fill="none" stroke="#CDC5B2" stroke-width="1.5" stroke-dasharray="5 4"/>`;
-  s += `<text x="${MARGIN.left+px(W)/2}" y="${MARGIN.top-10}" text-anchor="middle" font-size="17" fill="${cssVar('--accent')}" font-family="Caveat,cursive">${W.toFixed(1)} ม.</text>`;
+
+  // land plot outline (4-sided, actual shape)
+  const landPts = land.pts.map(p=>`${lx(p.x).toFixed(1)},${ly(p.y).toFixed(1)}`).join(' ');
+  s += `<polygon points="${landPts}" fill="#F1ECDC" stroke="#B7AE93" stroke-width="1.6" stroke-dasharray="7 4"/>`;
+  const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+  const [pFL,pFR,pBR,pBL] = land.pts;
+  const sideLabel=(a,b,text,dx,dy)=>{ const m=mid(a,b); return `<text x="${(lx(m.x)+dx).toFixed(1)}" y="${(ly(m.y)+dy).toFixed(1)}" text-anchor="middle" font-size="11.5" fill="#9C9276" font-family="JetBrains Mono,monospace">${text}</text>`; };
+  s += sideLabel(pFL,pFR, `หน้า ${state.land.front.toFixed(1)} ม.`, 0, -8);
+  s += sideLabel(pBL,pBR, `หลัง ${state.land.back.toFixed(1)} ม.`, 0, 18);
+  s += sideLabel(pFL,pBL, `ซ้าย ${state.land.left.toFixed(1)} ม.`, -30, 0);
+  s += sideLabel(pFR,pBR, `ขวา ${state.land.right.toFixed(1)} ม.`, 30, 0);
+  s += drawNorthArrow(null, land, HOUSE_OFFSET, W, D, [], true);
+
+  // house footprint boundary, placed inside the land plot — press-and-hold on empty space inside to drag the house
+  const houseStroke = movingHouse ? cssVar('--accent') : '#CDC5B2';
+  const houseFill = movingHouse ? 'rgba(124,48,72,0.06)' : 'none';
+  s += `<rect x="${wx(0)}" y="${wy(0)}" width="${px(W)}" height="${px(D)}" fill="${houseFill}" stroke="${houseStroke}" stroke-width="${movingHouse?2.2:1.5}" stroke-dasharray="5 4"/>`;
+  s += `<text x="${wx(W/2)}" y="${wy(0)-10}" text-anchor="middle" font-size="14" fill="${cssVar('--accent')}" font-family="Caveat,cursive">บ้านกว้าง ${W.toFixed(1)}×${D.toFixed(1)} ม. · หน้าบ้านทิศ${dirLabelFor(state.frontFacing).split(' ')[0]}</text>`;
 
   const f = curFloor();
   if (state.view==='plan2d'){
@@ -531,68 +628,113 @@ function poly(pts, fill){
   return `<polygon points="${pts.map(p=>`${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')}" fill="${fill}" stroke="#221F1B" stroke-width="1"/>`;
 }
 
+function avgDepth(pts){ return pts.reduce((s,p)=>s+p.depth,0)/pts.length; }
+
+function drawBox3D(P, items, x0,z0,w,d,h,yBase,color){
+  const x1=x0+w, z1=z0+d;
+  const b1=P(x0,yBase,z0), b2=P(x1,yBase,z0), b3=P(x1,yBase,z1), b4=P(x0,yBase,z1);
+  const t1=P(x0,yBase+h,z0), t2=P(x1,yBase+h,z0), t3=P(x1,yBase+h,z1), t4=P(x0,yBase+h,z1);
+  const faces = [
+    { pts:[t1,t2,t3,t4], shade:0.14 },
+    { pts:[b1,b2,t2,t1], shade:-0.04 },
+    { pts:[b2,b3,t3,t2], shade:-0.16 },
+    { pts:[b4,b1,t1,t4], shade:0.03 },
+    { pts:[b3,b4,t4,t3], shade:-0.22 },
+  ];
+  faces.forEach(f=> items.push({ depth: avgDepth(f.pts), svg: poly(f.pts, shade(color,f.shade)) }));
+}
+
+const FURN_3D = {
+  bed:{h:.5,c:'#EFE0C8'}, sofa:{h:.42,c:'#D9C9DB'}, table:{h:.75,c:'#DCC9A6'}, wardrobe:{h:1.05,c:'#C9B79C'},
+  toilet:{h:.4,c:'#F4F2EC'}, sink:{h:.85,c:'#F4F2EC'}, stove:{h:.9,c:'#DADFE0'}, tv:{h:.5,c:'#3A3530'},
+};
+
+function drawNorthArrow(P, land, offs, W, D, items, screenSpace){
+  const screenAngle = (360-(state.frontFacing||0))%360;
+  const rad = screenAngle*Math.PI/180;
+  if (screenSpace){
+    // 2D plan: simple compass badge near top-right of the land bounding box
+    const cxm = land.width*0.9, cym = Math.max(0.7, land.depth*0.08);
+    const cx = lx(cxm), cy = ly(cym), r = 15;
+    const tipX = cx + r*Math.sin(rad), tipY = cy - r*Math.cos(rad);
+    const blX = cx + r*0.4*Math.sin(rad+2.5), blY = cy - r*0.4*Math.cos(rad+2.5);
+    const brX = cx + r*0.4*Math.sin(rad-2.5), brY = cy - r*0.4*Math.cos(rad-2.5);
+    const lblX = cx + (r+11)*Math.sin(rad), lblY = cy - (r+11)*Math.cos(rad);
+    return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}" fill="#fff" stroke="#B7AE93" stroke-width="1.3"/>
+      <polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${blX.toFixed(1)},${blY.toFixed(1)} ${brX.toFixed(1)},${brY.toFixed(1)}" fill="#7C3048"/>
+      <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2" fill="#7C3048"/>
+      <text x="${lblX.toFixed(1)}" y="${(lblY+4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="#7C3048">N</text>`;
+  }
+  // 3D: project a true north vector on the ground so the arrow rotates correctly with camera angle
+  const ndx = Math.sin(rad), ndz = -Math.cos(rad);
+  const baseLandX = land.width*0.88, baseLandZ = Math.max(0.8, land.depth*0.1);
+  const bwx = baseLandX-(offs.x+W/2), bwz = baseLandZ-(offs.y+D/2);
+  const pb = P(bwx,0.02,bwz), pt_ = P(bwx+ndx*1.1,0.02,bwz+ndz*1.1);
+  let dxs=pt_.sx-pb.sx, dys=pt_.sy-pb.sy; const len=Math.max(0.001,Math.hypot(dxs,dys));
+  const ux=dxs/len, uy=dys/len, perpX=-uy, perpY=ux;
+  const r=15*zoom3d, arrowLen=26*zoom3d, wgt=6*zoom3d;
+  const tipX=pb.sx+ux*arrowLen, tipY=pb.sy+uy*arrowLen;
+  const svg = `<circle cx="${pb.sx.toFixed(1)}" cy="${pb.sy.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff" stroke="#B7AE93" stroke-width="1.2"/>
+    <polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${(pb.sx+perpX*wgt*0.5).toFixed(1)},${(pb.sy+perpY*wgt*0.5).toFixed(1)} ${(pb.sx-perpX*wgt*0.5).toFixed(1)},${(pb.sy-perpY*wgt*0.5).toFixed(1)}" fill="#7C3048"/>
+    <text x="${(tipX+ux*11).toFixed(1)}" y="${(tipY+uy*11+4).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="#7C3048">N</text>`;
+  items.push({ depth: 99999, svg });
+}
+
 function renderElevation3D(){
   projScale = 30*zoom3d;
-  const W=state.width, D=state.depth, H=state.floors*FLOOR_H;
+  const W=state.width, D=state.depth;
   const hw=W/2, hd=D/2;
   const color = state.houseColor;
-  const roofColor = '#3A3530';
+  const WALL_H = 1.15; // low cutaway wall per floor so the room layout inside stays visible ("dollhouse" view)
 
   const P = (x,y,z)=>project(x,y,z);
   const items = [];
 
-  const gsize = Math.max(W,D)*1.8, gh=gsize/2;
+  const land = landGeom();
+  const offs = computeHouseOffset(land);
+  const gsize = Math.max(land.width,land.depth)*1.35, gh=gsize/2;
   const gCorners = [P(-gh,0,-gh),P(gh,0,-gh),P(gh,0,gh),P(-gh,0,gh)];
-  let groundSvg = poly(gCorners, '#E6EADD');
-
-  const b_fl=P(-hw,0,hd), b_fr=P(hw,0,hd), b_bl=P(-hw,0,-hd), b_br=P(hw,0,-hd);
-  const t_fl=P(-hw,H,hd), t_fr=P(hw,H,hd), t_bl=P(-hw,H,-hd), t_br=P(hw,H,-hd);
-
-  const faces = [
-    { pts:[b_fl,b_fr,t_fr,t_fl], shade:0.05 },
-    { pts:[b_br,b_bl,t_bl,t_br], shade:-0.18 },
-    { pts:[b_bl,b_fl,t_fl,t_bl], shade:-0.08 },
-    { pts:[b_fr,b_br,t_br,t_fr], shade:-0.02 },
-  ];
-  faces.forEach(fc=>{
-    const avg = (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth+fc.pts[3].depth)/4;
-    items.push({ depth: avg, svg: poly(fc.pts, shade(color, fc.shade)) });
-  });
-
-  const roofH = 1.3;
-  const apex = P(0, H+roofH, 0);
-  const roofFaces = [
-    { pts:[t_fl,t_fr,apex], shade:0.08 }, { pts:[t_fr,t_br,apex], shade:-0.05 },
-    { pts:[t_br,t_bl,apex], shade:-0.16 }, { pts:[t_bl,t_fl,apex], shade:-0.09 },
-  ];
-  roofFaces.forEach(fc=>{
-    const avg = (fc.pts[0].depth+fc.pts[1].depth+fc.pts[2].depth)/3;
-    items.push({ depth:avg, svg: poly(fc.pts, shade(roofColor, fc.shade)) });
-  });
+  let groundSvg = poly(gCorners, '#E3E9D9');
+  const landPts3d = land.pts.map(p=>P(p.x-(offs.x+W/2), 0.01, p.y-(offs.y+D/2)));
+  groundSvg += `<polygon points="${landPts3d.map(p=>`${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')}" fill="#EFE9D9" stroke="#C7BE9F" stroke-width="1.4" stroke-dasharray="5 3"/>`;
 
   for (let fl=0; fl<state.floors; fl++){
-    const floorObjs = (floorsData[fl] && floorsData[fl].objects) || [];
-    const bedCount = Math.max(1, floorObjs.filter(o=>o.kind==='room' && o.type==='bedroom').length);
-    const winCount = fl===0 ? Math.max(1,bedCount-1) : bedCount+1;
     const yBase = fl*FLOOR_H;
-    const usable = W-1;
-    for (let i=1;i<=winCount;i++){
-      const wx0 = -W/2 + 0.5 + usable*(i/(winCount+1)) - 0.4;
-      const p1=P(wx0,yBase+1.1,hd), p2=P(wx0+0.8,yBase+1.1,hd), p3=P(wx0+0.8,yBase+2.0,hd), p4=P(wx0,yBase+2.0,hd);
-      const avg=(p1.depth+p2.depth+p3.depth+p4.depth)/4 + 0.02;
-      items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#B9C9CE') });
-    }
-  }
-  {
-    const dw=0.9, dh=2.0;
-    const p1=P(-dw/2,0,hd), p2=P(dw/2,0,hd), p3=P(dw/2,dh,hd), p4=P(-dw/2,dh,hd);
-    const avg=(p1.depth+p2.depth+p3.depth+p4.depth)/4 + 0.03;
-    items.push({ depth:avg, svg: poly([p1,p2,p3,p4], '#5C4536') });
+    const floor = floorsData[fl] || { objects:[] };
+
+    // floor slab
+    const s1=P(-hw,yBase,hd), s2=P(hw,yBase,hd), s3=P(hw,yBase,-hd), s4=P(-hw,yBase,-hd);
+    items.push({ depth: avgDepth([s1,s2,s3,s4])-0.02, svg: poly([s1,s2,s3,s4], shade('#EDE7D8', -0.03*fl)) });
+
+    // low perimeter walls (cutaway, so the layout inside stays visible from above)
+    const b_fl=P(-hw,yBase,hd), b_fr=P(hw,yBase,hd), b_bl=P(-hw,yBase,-hd), b_br=P(hw,yBase,-hd);
+    const t_fl=P(-hw,yBase+WALL_H,hd), t_fr=P(hw,yBase+WALL_H,hd), t_bl=P(-hw,yBase+WALL_H,-hd), t_br=P(hw,yBase+WALL_H,-hd);
+    const wallFaces = [
+      { pts:[b_fl,b_fr,t_fr,t_fl], shade:0.05 },
+      { pts:[b_br,b_bl,t_bl,t_br], shade:-0.18 },
+      { pts:[b_bl,b_fl,t_fl,t_bl], shade:-0.08 },
+      { pts:[b_fr,b_br,t_br,t_fr], shade:-0.02 },
+    ];
+    wallFaces.forEach(fc=> items.push({ depth: avgDepth(fc.pts), svg: poly(fc.pts, shade(color, fc.shade)) }));
+
+    // rooms — flat colored floor patches (like the 2D plan, painted on the slab) so the layout reads at a glance
+    (floor.objects||[]).filter(o=>o.kind==='room').forEach(o=>{
+      const x0=o.x-hw, z0=o.y-hd;
+      const p1=P(x0,yBase+0.03,z0), p2=P(x0+o.w,yBase+0.03,z0), p3=P(x0+o.w,yBase+0.03,z0+o.h), p4=P(x0,yBase+0.03,z0+o.h);
+      items.push({ depth: avgDepth([p1,p2,p3,p4])-0.01, svg: poly([p1,p2,p3,p4], ROOM_COLOR[o.type]||'#EAE7E0') });
+    });
+
+    // furniture — small miniature 3D blocks so the inside reads like a dollhouse
+    (floor.objects||[]).filter(o=>o.kind==='furniture' && FURN_3D[o.subtype]).forEach(o=>{
+      const def = FURN_3D[o.subtype];
+      drawBox3D(P, items, o.x-hw, o.y-hd, o.w, o.h, def.h, yBase+0.03, def.c);
+    });
   }
 
+  // trees & cars placed on the ground floor plan
   const groundObjs = (floorsData[0] && floorsData[0].objects) || [];
   groundObjs.filter(o=>o.kind==='furniture' && (o.subtype==='tree'||o.subtype==='car')).forEach(o=>{
-    const worldX = (o.x+o.w/2) - W/2, worldZ = (o.y+o.h/2) - D/2;
+    const worldX = (o.x+o.w/2) - hw, worldZ = (o.y+o.h/2) - hd;
     const base = P(worldX,0,worldZ);
     const isTree = o.subtype==='tree';
     const iw = (isTree?30:40)*zoom3d, ih = (isTree?42:22)*zoom3d;
@@ -606,9 +748,14 @@ function renderElevation3D(){
     items.push({ depth: base.depth+0.05, svg });
   });
 
+  drawNorthArrow(P, land, offs, W, D, items, false);
+
   items.sort((a,b)=>a.depth-b.depth);
 
-  const allPts = [b_fl,b_fr,b_bl,b_br,t_fl,t_fr,t_bl,t_br,apex,...gCorners];
+  const topH = state.floors*FLOOR_H;
+  const allPts = [P(-hw,0,hd),P(hw,0,hd),P(-hw,0,-hd),P(hw,0,-hd),
+                   P(-hw,topH,hd),P(hw,topH,hd),P(-hw,topH,-hd),P(hw,topH,-hd),
+                   ...landPts3d,...gCorners];
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   allPts.forEach(p=>{ minX=Math.min(minX,p.sx); maxX=Math.max(maxX,p.sx); minY=Math.min(minY,p.sy); maxY=Math.max(maxY,p.sy); });
   const pad=40;
@@ -630,7 +777,7 @@ function toMeters(evt){
   const pt = svg.createSVGPoint();
   pt.x = evt.clientX; pt.y = evt.clientY;
   const p = pt.matrixTransform(svg.getScreenCTM().inverse());
-  return { x:(p.x-MARGIN.left)/SCALE, y:(p.y-MARGIN.top)/SCALE };
+  return { x:(p.x-MARGIN.left)/SCALE-HOUSE_OFFSET.x, y:(p.y-MARGIN.top)/SCALE-HOUSE_OFFSET.y };
 }
 function toInternalPx(evt){
   const svg = els.canvasWrap.querySelector('svg');
@@ -698,6 +845,7 @@ function onCanvasDown(e){
     const pts=[...activePointers.values()].slice(0,2);
     pinch = { startDist: dist(pts[0],pts[1]), startZoom: state.view==='elevation3d'?zoom3d:viewport.zoom };
     movingId=null; resizing=null; drawingRoom=null; previewRoom=null; panning=false; dragging3d=false;
+    movingHouse=false; clearTimeout(houseMoveTimer);
     return;
   }
 
@@ -722,9 +870,19 @@ function onCanvasDown(e){
 
   const hit = hitTestObject(pt);
   if (hit){
-    selectedId = hit.id;
-    if (hit.kind!=='wire' && hit.kind!=='pipe'){ movingId=hit.id; dragOffset={x:pt.x-hit.x,y:pt.y-hit.y}; }
-    renderProps(); renderCanvas();
+    const draggable = hit.kind!=='wire' && hit.kind!=='pipe';
+    if (draggable){
+      const now = Date.now();
+      const isDouble = (lastTap.id===hit.id) && (now-lastTap.time<400);
+      lastTap = { id:hit.id, time:now };
+      selectedId = hit.id;
+      movingId = hit.id; dragOffset = {x:pt.x-hit.x, y:pt.y-hit.y};
+      if (isDouble) renderProps(); else closeSheet();
+    } else {
+      selectedId = hit.id;
+      renderProps();
+    }
+    renderCanvas();
     e.preventDefault();
     return;
   }
@@ -749,7 +907,20 @@ function onCanvasDown(e){
     const obj = { id:'o'+(uid++), kind, subtype:currentSubtype, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
     activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
   } else {
+    const insideHouse = state.view==='plan2d' && currentTool==='select' &&
+      pt.x>=-0.05 && pt.x<=state.width+0.05 && pt.y>=-0.05 && pt.y<=state.depth+0.05;
     panning = true; panMoved = false; lastInternal = toInternalPx(e);
+    if (insideHouse){
+      houseDragStartInternal = toInternalPx(e);
+      houseDragOffsetStart = { x: HOUSE_OFFSET.x, y: HOUSE_OFFSET.y };
+      clearTimeout(houseMoveTimer);
+      houseMoveTimer = setTimeout(()=>{
+        if (!panMoved){
+          movingHouse = true; panning = false;
+          renderCanvas();
+        }
+      }, 420);
+    }
   }
 }
 
@@ -784,10 +955,19 @@ function onCanvasMove(e){
     return;
   }
 
+  if (movingHouse){
+    const cur = toInternalPx(e);
+    const dxm = (cur.x-houseDragStartInternal.x)/SCALE;
+    const dym = (cur.y-houseDragStartInternal.y)/SCALE;
+    state.houseOffset = { x: houseDragOffsetStart.x+dxm, y: houseDragOffsetStart.y+dym };
+    renderCanvas();
+    return;
+  }
+
   if (panning){
     const cur = toInternalPx(e);
     const dx = cur.x-lastInternal.x, dy = cur.y-lastInternal.y;
-    if (Math.abs(dx)+Math.abs(dy) > 0.6) panMoved = true;
+    if (Math.abs(dx)+Math.abs(dy) > 0.6){ panMoved = true; clearTimeout(houseMoveTimer); }
     viewport.x -= dx; viewport.y -= dy;
     renderCanvas();
     lastInternal = toInternalPx(e);
@@ -825,6 +1005,13 @@ function onCanvasUp(e){
   activePointers.delete(e.pointerId);
   if (activePointers.size<2) pinch = null;
   dragging3d = false;
+  clearTimeout(houseMoveTimer);
+
+  if (movingHouse){
+    movingHouse = false; panning = false;
+    renderCanvas();
+    return;
+  }
 
   if (panning){
     if (!panMoved){ selectedId=null; closeSheet(); }
@@ -896,6 +1083,15 @@ document.getElementById('zoomReset').onclick=resetZoom;
 els.widthInput.addEventListener('input', e=>{ state.width=clamp(parseFloat(e.target.value)||8,3,30); renderCanvas(); });
 els.depthInput.addEventListener('input', e=>{ state.depth=clamp(parseFloat(e.target.value)||9.5,3,30); renderCanvas(); });
 els.floorsInput.addEventListener('input', e=>{ state.floors=clamp(parseInt(e.target.value)||1,1,4); syncFloors(); buildFloorTabs(); renderCanvas(); });
+
+els.landFrontInput.addEventListener('input', e=>{ state.land.front=clamp(parseFloat(e.target.value)||12,3,80); renderCanvas(); });
+els.landBackInput.addEventListener('input', e=>{ state.land.back=clamp(parseFloat(e.target.value)||12,3,80); renderCanvas(); });
+els.landLeftInput.addEventListener('input', e=>{ state.land.left=clamp(parseFloat(e.target.value)||16,3,80); renderCanvas(); });
+els.landRightInput.addEventListener('input', e=>{ state.land.right=clamp(parseFloat(e.target.value)||16,3,80); renderCanvas(); });
+
+els.frontFacingInput.innerHTML = DIRS8.map(d=>`<option value="${d.v}">${d.label}</option>`).join('');
+els.frontFacingInput.value = state.frontFacing;
+els.frontFacingInput.addEventListener('change', e=>{ state.frontFacing = parseInt(e.target.value)||0; renderCanvas(); });
 
 document.getElementById('clearBtn').onclick = ()=>{
   const key = activeArrayKey();
