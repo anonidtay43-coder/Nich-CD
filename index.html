@@ -43,6 +43,13 @@
   .settings-panel select{ width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 6px; font-size:14px; font-family:'Sarabun',sans-serif; background:#fff; color:var(--ink); }
 
   .floortabs{display:flex; gap:6px; padding:0 14px 8px; overflow-x:auto; align-items:center;}
+  .floor-height-row{display:flex; align-items:center; gap:8px; padding:0 14px 10px; font-size:12.5px; color:var(--ink-soft);}
+  .floor-height-row input{width:70px; font-family:'Sarabun',sans-serif; border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:14px; text-align:center;}
+  .poly-actions{display:none; gap:8px; padding:0 14px 10px; flex-wrap:wrap;}
+  .poly-actions button{border:none; border-radius:9px; padding:9px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:'Sarabun',sans-serif;}
+  .poly-actions #polyFinish{background:var(--accent); color:#fff;}
+  .poly-actions #polyUndo{background:var(--card); border:1px solid var(--line); color:var(--ink);}
+  .poly-actions #polyCancel{background:#F3E3E4; color:#9B3A44;}
   .tab{padding:7px 13px; border-radius:16px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); flex:none;}
   .tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
   .tab-icon-btn{flex:none; width:30px; height:30px; border-radius:50%; border:1px dashed var(--line); background:#fff; cursor:pointer; font-size:15px; color:var(--ink-soft); line-height:1;}
@@ -81,6 +88,21 @@
   .btn-rotate{background:var(--paper); border:1px solid var(--line) !important; color:var(--ink);}
   .btn-delete{background:#9B3A44; color:#fff;}
   .sheet .field-label{font-size:12px; color:var(--ink-soft); margin-top:12px; display:block;}
+
+  .project-bar{display:flex; align-items:center; gap:8px; padding:0 16px 10px;}
+  .project-name-input{flex:1; min-width:0; border:1px solid var(--line); border-radius:9px; padding:9px 11px; font-size:14px; font-family:'Sarabun',sans-serif; background:var(--card); color:var(--ink);}
+  .icon-btn{width:38px; height:38px; flex:none; border-radius:9px; border:1px solid var(--line); background:var(--card); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink);}
+  .icon-btn:disabled{opacity:.35; cursor:default;}
+  .icon-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .settings-panel button.act{border:none; border-radius:10px; padding:11px; font-weight:600; font-size:13px; cursor:pointer; flex:1; font-family:'Sarabun',sans-serif;}
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-secondary{background:var(--paper); border:1px solid var(--line)!important; color:var(--ink);}
+  .project-row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px; border:1px solid var(--line); border-radius:9px; margin-bottom:6px; background:#fff;}
+  .project-row .pname{font-weight:600; font-size:13.5px;}
+  .project-row .pmeta{font-size:11px; color:var(--ink-soft);}
+  .project-row .prow-actions{display:flex; gap:6px; flex:none;}
+  .project-row button{border:none; border-radius:7px; padding:7px 10px; font-size:12px; cursor:pointer; font-family:'Sarabun',sans-serif; font-weight:600;}
+  .project-empty{font-size:12.5px; color:var(--ink-soft); padding:8px 2px;}
 </style>
 </head>
 <body>
@@ -90,6 +112,29 @@
     <h1>สตูดิโอวางผังบ้าน</h1>
   </header>
 
+  <div class="project-bar">
+    <input type="text" id="projectNameInput" class="project-name-input" value="โครงการที่ 1" placeholder="ชื่อไซต์งาน/โครงการ">
+    <button class="icon-btn" id="undoBtn" title="ย้อนกลับ">↶</button>
+    <button class="icon-btn" id="redoBtn" title="ไปข้างหน้า">↷</button>
+    <button class="icon-btn" id="projectsToggle" title="โครงการที่บันทึกไว้">🗂️</button>
+  </div>
+  <div class="settings-panel" id="projectsPanel">
+    <div class="settings-group">
+      <div class="settings-group-title">🗂️ โครงการ / ไซต์งาน</div>
+      <div class="settings-group-sub">บันทึกไว้ในระบบได้หลายไซต์งาน แล้วกลับมาเปิดดูภายหลัง หรือส่งออก/นำเข้าเป็นไฟล์เพื่อย้ายเครื่องได้</div>
+      <div class="btn-row" style="display:flex; gap:8px; margin:2px 0 4px;">
+        <button class="act btn-primary" id="saveProjectBtn">💾 บันทึกโครงการนี้</button>
+        <button class="act btn-secondary" id="newProjectBtn">➕ โครงการใหม่</button>
+      </div>
+      <div class="btn-row" style="display:flex; gap:8px; margin:0 0 10px;">
+        <button class="act btn-secondary" id="exportProjectBtn">⬇️ ส่งออกไฟล์</button>
+        <button class="act btn-secondary" id="importProjectBtn">⬆️ นำเข้าไฟล์</button>
+        <input type="file" id="importProjectFile" accept="application/json" style="display:none;">
+      </div>
+      <div id="projectsList"></div>
+    </div>
+  </div>
+
   <div class="viewtabs" id="viewTabs"></div>
 
   <div class="settings-toggle" id="settingsToggle"><span>⚙️ ขนาดที่ดิน / ขนาดบ้าน / จำนวนชั้น</span><span id="settingsChevron">▾</span></div>
@@ -98,8 +143,8 @@
       <div class="settings-group-title">📐 ขนาดที่ดิน (ม.) — ระบุครบ 4 ด้าน</div>
       <div class="settings-group-sub">ที่ดินแต่ละแปลงไม่เป็นสี่เหลี่ยมผืนผ้าเท่ากัน ใส่ให้ตรงหน้างานจริง</div>
       <div class="settings-grid">
-        <div class="field"><label>ด้านหน้า (ม.)</label><input type="number" id="landFrontInput" min="3" max="80" step="0.1" value="12"></div>
-        <div class="field"><label>ด้านหลัง (ม.)</label><input type="number" id="landBackInput" min="3" max="80" step="0.1" value="12"></div>
+        <div class="field"><label>ด้านหลัง (ม.)</label><input type="number" id="landFrontInput" min="3" max="80" step="0.1" value="12"></div>
+        <div class="field"><label>ด้านหน้า (ม.)</label><input type="number" id="landBackInput" min="3" max="80" step="0.1" value="12"></div>
         <div class="field"><label>ด้านซ้าย (ม.)</label><input type="number" id="landLeftInput" min="3" max="80" step="0.1" value="16"></div>
         <div class="field"><label>ด้านขวา (ม.)</label><input type="number" id="landRightInput" min="3" max="80" step="0.1" value="16"></div>
       </div>
@@ -114,13 +159,18 @@
     </div>
     <div class="settings-group">
       <div class="settings-group-title">🧭 ทิศทางของบ้าน</div>
-      <div class="field"><label>ด้านหน้าบ้านหันไปทาง</label>
-        <select id="frontFacingInput"></select>
+      <div class="field"><label>ด้านไหนของที่ดินคือทิศเหนือ</label>
+        <select id="northSideInput"></select>
       </div>
+      <div class="settings-group-sub" id="northSummary">🧭 ทิศเหนืออยู่ทางด้านหลังของที่ดิน</div>
     </div>
   </div>
 
   <div class="floortabs" id="floorTabs"></div>
+  <div class="floor-height-row" id="floorHeightRow">
+    <label for="floorHeightInput">สูงชั้นนี้ (ม.)</label>
+    <input type="number" id="floorHeightInput" min="2" max="6" step="0.05" value="3">
+  </div>
   <div class="toolbar" id="toolbar"></div>
 
   <div class="canvas-card">
@@ -132,6 +182,11 @@
     </div>
   </div>
   <div class="canvas-hint" id="canvasHint"></div>
+  <div class="poly-actions" id="polyActions" style="display:none;">
+    <button id="polyFinish">✓ เสร็จ ปิดรูปห้อง</button>
+    <button id="polyUndo">↩︎ ลบจุดล่าสุด</button>
+    <button id="polyCancel">✕ ยกเลิก</button>
+  </div>
 
   <div class="foot-actions">
     <button class="icon-btn" id="clearBtn">ล้างชั้นนี้</button>
@@ -153,11 +208,11 @@ const MARGIN = { top:34, right:34, bottom:34, left:34 };
 const FLOOR_H = 3;
 let uid = 1;
 
-const state = { width:8, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
-  land:{ front:12, back:12, left:16, right:16 }, frontFacing:0, houseOffset:null };
+const state = { width:7, depth:10, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
+  land:{ front:11, back:11, left:15, right:15 }, frontFacing:0, northSide:'back', houseOffset:null };
 let HOUSE_OFFSET = { x:0, y:0 };
 let floorsData = [ mkFloor() ];
-function mkFloor(){ return { objects:[], electrical:[], plumbing:[] }; }
+function mkFloor(){ return { objects:[], electrical:[], plumbing:[], scribbles:[], height:3 }; }
 
 let currentTool = 'select';
 let currentSubtype = null;
@@ -167,6 +222,8 @@ let wireStart = null;
 let movingId=null, dragOffset=null, resizing=null, drawingRoom=null, previewRoom=null;
 let movingHouse=false, houseMoveTimer=null, houseDragStartInternal=null, houseDragOffsetStart=null;
 let lastTap = { id:null, time:0 };
+let drawingScribble = null;
+let drawingPoly = null;
 let viewport = { x:0, y:0, zoom:1 };
 
 let theta = Math.PI/4, phi = 0.6, dragging3d=false, lastX=0, lastY=0, zoom3d=1, projScale=30;
@@ -183,12 +240,12 @@ const ROOM_TYPES = [
 ];
 const ROOM_COLOR={}, ROOM_LABEL={}; ROOM_TYPES.forEach(t=>{ROOM_COLOR[t.key]=t.color; ROOM_LABEL[t.key]=t.label;});
 
-const DIRS8 = [
-  {v:0, label:'เหนือ (N)'}, {v:45, label:'ตะวันออกเฉียงเหนือ (NE)'}, {v:90, label:'ตะวันออก (E)'},
-  {v:135, label:'ตะวันออกเฉียงใต้ (SE)'}, {v:180, label:'ใต้ (S)'}, {v:225, label:'ตะวันตกเฉียงใต้ (SW)'},
-  {v:270, label:'ตะวันตก (W)'}, {v:315, label:'ตะวันตกเฉียงเหนือ (NW)'},
+const NORTH_SIDE_OPTS = [
+  { v:'back', label:'ด้านหลัง' }, { v:'front', label:'ด้านหน้า' }, { v:'left', label:'ด้านซ้าย' }, { v:'right', label:'ด้านขวา' },
 ];
-function dirLabelFor(v){ const d=DIRS8.find(d=>d.v===v); return d?d.label:'เหนือ (N)'; }
+const NORTH_SIDE_BEARING = { back:0, front:180, left:90, right:270 };
+function northSideLabel(){ const o=NORTH_SIDE_OPTS.find(o=>o.v===(state.northSide||'back')); return o?o.label:'ด้านหลัง'; }
+function applyNorthSide(){ state.frontFacing = NORTH_SIDE_BEARING[state.northSide||'back']; }
 
 const DEFAULTS = {
   door:{w:.9,h:.9,min:.5,label:'ประตู'}, window:{w:1.2,h:.15,min:.15,label:'หน้าต่าง'}, aircon:{w:.8,h:.25,min:.2,label:'แอร์'},
@@ -200,16 +257,48 @@ const DEFAULTS = {
   supply:{w:.3,h:.3,min:.15,label:'จุดจ่ายน้ำ'}, drain:{w:.3,h:.3,min:.15,label:'ท่อระบาย'}, heater:{w:.5,h:.5,min:.2,label:'เครื่องทำน้ำอุ่น'}, septic:{w:1.0,h:1.4,min:.3,label:'ถังบำบัด'},
 };
 
+// starter layout roughly matching the uploaded reference plan: bedroom + kitchen/dining up top,
+// bathroom + storage/laundry in the middle, second bedroom + wood deck below.
+function populateStarterFloor(floor){
+  const mkRoom = (x,y,w,h,type,label)=>({ id:'o'+(uid++), kind:'room', x,y,w,h, type, label });
+  const mkFurn = (subtype,x,y)=>{ const d=DEFAULTS[subtype]; return { id:'o'+(uid++), kind:'furniture', subtype, x, y, w:d.w, h:d.h, rotation:0 }; };
+  floor.objects.push(
+    mkRoom(0,0,3.5,3.5,'bedroom','ห้องนอนใหญ่'),
+    mkRoom(3.5,0,3.5,2.5,'kitchen','ครัว + โต๊ะทานข้าว'),
+    mkRoom(3.5,2.5,2.0,2.5,'bathroom','ห้องน้ำ'),
+    mkRoom(0,3.5,2.0,4.0,'other','ซักล้าง / เก็บของ'),
+    mkRoom(3.5,5.0,3.5,3.5,'bedroom','ห้องนอนเล็ก'),
+    mkRoom(0,7.5,4.5,2.5,'balcony','ระเบียงไม้'),
+  );
+  floor.objects.push(
+    mkFurn('bed',0.9,0.6),
+    mkFurn('table',4.8,0.85),
+    mkFurn('toilet',3.75,2.75),
+    mkFurn('sink',3.75,4.15),
+    mkFurn('bed',4.2,5.3),
+    mkFurn('wardrobe',5.4,5.1),
+  );
+}
+populateStarterFloor(floorsData[0]);
+
+
+
 const els = {
   viewTabs: document.getElementById('viewTabs'), floorTabs: document.getElementById('floorTabs'),
+  floorHeightInput: document.getElementById('floorHeightInput'), floorHeightRow: document.getElementById('floorHeightRow'),
   toolbar: document.getElementById('toolbar'), canvasWrap: document.getElementById('canvasWrap'),
   canvasHint: document.getElementById('canvasHint'),
+  polyActions: document.getElementById('polyActions'), polyFinish: document.getElementById('polyFinish'), polyUndo: document.getElementById('polyUndo'), polyCancel: document.getElementById('polyCancel'),
   propSheet: document.getElementById('propSheet'), propBody: document.getElementById('propBody'), sheetBackdrop: document.getElementById('sheetBackdrop'),
   widthInput: document.getElementById('widthInput'), depthInput: document.getElementById('depthInput'), floorsInput: document.getElementById('floorsInput'),
   landFrontInput: document.getElementById('landFrontInput'), landBackInput: document.getElementById('landBackInput'),
   landLeftInput: document.getElementById('landLeftInput'), landRightInput: document.getElementById('landRightInput'),
-  frontFacingInput: document.getElementById('frontFacingInput'),
+  frontFacingInput: document.getElementById('northSideInput'), northSummary: document.getElementById('northSummary'),
   settingsToggle: document.getElementById('settingsToggle'), settingsPanel: document.getElementById('settingsPanel'), settingsChevron: document.getElementById('settingsChevron'),
+  projectNameInput: document.getElementById('projectNameInput'), undoBtn: document.getElementById('undoBtn'), redoBtn: document.getElementById('redoBtn'),
+  projectsToggle: document.getElementById('projectsToggle'), projectsPanel: document.getElementById('projectsPanel'), projectsList: document.getElementById('projectsList'),
+  saveProjectBtn: document.getElementById('saveProjectBtn'), newProjectBtn: document.getElementById('newProjectBtn'),
+  exportProjectBtn: document.getElementById('exportProjectBtn'), importProjectBtn: document.getElementById('importProjectBtn'), importProjectFile: document.getElementById('importProjectFile'),
 };
 
 function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
@@ -245,6 +334,7 @@ function buildViewTabs(){
 /* ---------------- floor tabs ---------------- */
 function buildFloorTabs(){
   els.floorTabs.style.display = state.view==='elevation3d' ? 'none' : 'flex';
+  els.floorHeightRow.style.display = state.view==='elevation3d' ? 'none' : 'flex';
   els.floorTabs.innerHTML='';
   floorsData.forEach((f,i)=>{
     const b=document.createElement('div');
@@ -253,6 +343,8 @@ function buildFloorTabs(){
     b.onclick=()=>{ state.activeFloor=i; selectedId=null; closeSheet(); renderCanvas(); };
     els.floorTabs.appendChild(b);
   });
+  const cf = floorsData[state.activeFloor];
+  if (cf) els.floorHeightInput.value = (cf.height||3).toFixed(2);
 }
 
 /* ---------------- toolbar ---------------- */
@@ -267,18 +359,20 @@ function buildToolbar(){
     const active = currentTool===id && (subtype?currentSubtype===subtype:true);
     b.className='tool-btn'+(active?' active':'');
     b.innerHTML = `${icon}<span>${label}</span>`;
-    b.onclick=()=>{ currentTool=id; currentSubtype=subtype||null; wireStart=null; buildToolbar(); updateHint(); };
+    b.onclick=()=>{ currentTool=id; currentSubtype=subtype||null; wireStart=null; drawingPoly=null; drawingScribble=null; updatePolyBar(); buildToolbar(); updateHint(); renderCanvas(); };
     els.toolbar.appendChild(b);
   };
   add('select', null, 'เลือก/ย้าย', selectIcon());
   if (state.view==='plan2d'){
     add('room', null, 'วาดห้อง', toolIcon('#EFE6D8'));
+    add('freeroom', null, 'ห้องอิสระ', toolIcon('#E4D9C4'));
     add('door', null, 'ประตู', toolIcon('#8A5A3A'));
     add('window', null, 'หน้าต่าง', toolIcon('#B9C9CE'));
     add('aircon', null, 'แอร์', toolIcon('#dfe3e2'));
     ['bed','sofa','table','wardrobe','toilet','sink','stove','tv'].forEach(k=>add('furniture',k,DEFAULTS[k].label,toolIcon('#e4ddcf')));
     add('furniture','tree','ต้นไม้',toolIcon('#A9C398'));
     add('furniture','car','รถยนต์',toolIcon('#c9d3da'));
+    add('pen', null, 'ปากกาโน้ต', lineIcon('#C0392B'));
   } else if (state.view==='electrical'){
     add('point','switch','สวิตช์',toolIcon('#E3B94F'));
     add('point','outlet','ปลั๊ก',toolIcon('#D98A4B'));
@@ -298,6 +392,8 @@ function buildToolbar(){
 function updateHint(){
   if (state.view==='elevation3d'){ els.canvasHint.textContent = 'ลากเพื่อหมุนดูรอบบ้าน (ไม่มีหลังคา เห็นห้อง/เฟอร์นิเจอร์ข้างในแบบจำลองย่อ) · จีบสองนิ้ว/เมาส์ล้อเพื่อซูม'; return; }
   if (currentTool==='room') els.canvasHint.textContent = 'ลากบนผังเพื่อวาดห้อง · จีบสองนิ้วเพื่อซูม';
+  else if (currentTool==='freeroom') els.canvasHint.textContent = 'แตะทีละจุดเพื่อวาดขอบห้อง (ไม่ต้องเป็นสี่เหลี่ยม) แล้วแตะจุดเริ่มต้นหรือปุ่ม "เสร็จ" เพื่อปิดรูป';
+  else if (currentTool==='pen') els.canvasHint.textContent = 'ลากค้างเพื่อวาดเส้นโน้ต/อธิบายแบบด้วยมือ เหมือนเขียนบนกระดาษ';
   else if (currentTool==='wire') els.canvasHint.textContent = 'แตะจุดแรก แล้วแตะจุดที่สองเพื่อลากเส้นเชื่อม';
   else if (currentTool==='select') els.canvasHint.textContent = 'แตะค้างแล้วลากเพื่อย้ายวัตถุ · แตะ 2 ครั้งเพื่อแก้ไข/ลบ · กดค้างพื้นที่ว่างในกรอบบ้านเพื่อย้ายทั้งบ้าน · ลากพื้นที่ว่างนอกบ้านเพื่อเลื่อนมุมมอง';
   else els.canvasHint.textContent = 'แตะบนผังเพื่อวางตำแหน่ง';
@@ -308,6 +404,7 @@ function openSheet(){ els.propSheet.classList.remove('closed'); els.sheetBackdro
 function closeSheet(){ els.propSheet.classList.add('closed'); els.sheetBackdrop.classList.remove('open'); }
 els.sheetBackdrop.onclick = ()=>{ selectedId=null; closeSheet(); renderCanvas(); };
 els.settingsToggle.onclick = ()=>{ els.settingsPanel.classList.toggle('open'); els.settingsChevron.textContent = els.settingsPanel.classList.contains('open')?'▴':'▾'; };
+els.propBody.addEventListener('change', ()=>pushHistory());
 
 function renderProps(){
   const o = selectedId ? findObj(selectedId) : null;
@@ -316,21 +413,27 @@ function renderProps(){
 
   if (o.kind==='room'){
     const opts = ROOM_TYPES.map(t=>`<option value="${t.key}" ${t.key===o.type?'selected':''}>${t.label}</option>`).join('');
+    const isPoly = !!(o.poly && o.poly.length>=3);
+    const dimsHtml = isPoly
+      ? `<div class="num-row"><div class="num-field" style="grid-column:1/-1;"><label>พื้นที่โดยประมาณ</label><input type="text" value="${polyArea(o.poly).toFixed(2)} ตร.ม." disabled></div></div>`
+      : `<div class="num-row">
+        <div class="num-field"><label>กว้าง (ม.)</label><input type="number" id="pW" step="0.1" min="0.9" value="${o.w.toFixed(2)}"></div>
+        <div class="num-field"><label>ยาว (ม.)</label><input type="number" id="pH" step="0.1" min="0.9" value="${o.h.toFixed(2)}"></div>
+      </div>`;
     els.propBody.innerHTML = `
-      <h3>ห้อง</h3>
+      <h3>ห้อง${isPoly?' (รูปทรงอิสระ)':''}</h3>
       <input type="text" id="pLabel" value="${o.label}">
       <span class="field-label">ประเภทห้อง</span>
       <select id="pType">${opts}</select>
-      <div class="num-row">
-        <div class="num-field"><label>กว้าง (ม.)</label><input type="number" id="pW" step="0.1" min="0.9" value="${o.w.toFixed(2)}"></div>
-        <div class="num-field"><label>ยาว (ม.)</label><input type="number" id="pH" step="0.1" min="0.9" value="${o.h.toFixed(2)}"></div>
-      </div>
+      ${dimsHtml}
       <div class="btn-row"><button class="act btn-delete" id="pDel">ลบห้องนี้</button></div>
     `;
     document.getElementById('pLabel').oninput = e=>{ o.label=e.target.value; renderCanvas(); };
     document.getElementById('pType').onchange = e=>{ o.type=e.target.value; renderCanvas(); };
-    document.getElementById('pW').oninput = e=>{ o.w=Math.max(0.9, parseFloat(e.target.value)||0.9); renderCanvas(); };
-    document.getElementById('pH').oninput = e=>{ o.h=Math.max(0.9, parseFloat(e.target.value)||0.9); renderCanvas(); };
+    if (!isPoly){
+      document.getElementById('pW').oninput = e=>{ o.w=Math.max(0.9, parseFloat(e.target.value)||0.9); renderCanvas(); };
+      document.getElementById('pH').oninput = e=>{ o.h=Math.max(0.9, parseFloat(e.target.value)||0.9); renderCanvas(); };
+    }
     document.getElementById('pDel').onclick = deleteSelected;
     return;
   }
@@ -399,6 +502,7 @@ function deleteSelected(){
     }
   }
   selectedId=null; closeSheet(); renderCanvas();
+  pushHistory();
 }
 
 /* ---------------- 2D drawing helpers ---------------- */
@@ -444,6 +548,14 @@ function computeHouseOffset(land){
   const oy = setback;
   return { x:ox, y:oy };
 }
+const LAND_FREE_SUBTYPES = new Set(['tree','car']);
+function objBounds(subtype, w, h){
+  if (LAND_FREE_SUBTYPES.has(subtype)){
+    const land = landGeom();
+    return { minX:-HOUSE_OFFSET.x, maxX: land.width-HOUSE_OFFSET.x-w, minY:-HOUSE_OFFSET.y, maxY: land.depth-HOUSE_OFFSET.y-h };
+  }
+  return { minX:0, maxX: state.width-w, minY:0, maxY: state.depth-h };
+}
 
 function rotWrap(o, inner){
   const cx = wx(o.x+o.w/2), cy = wy(o.y+o.h/2);
@@ -462,14 +574,27 @@ function handles(o){
   }).join('');
 }
 
+function polyArea(pts){
+  let a=0;
+  for (let i=0;i<pts.length;i++){ const p1=pts[i], p2=pts[(i+1)%pts.length]; a += p1.x*p2.y - p2.x*p1.y; }
+  return Math.abs(a)/2;
+}
 function drawRoom(o, sel){
-  const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
   let s = `<g data-id="${o.id}">`;
-  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#221F1B" stroke-width="2.5"/>`;
-  s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
-  s += `<text x="${x+w/2}" y="${y+h/2+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
+  if (o.poly && o.poly.length>=3){
+    const pts = o.poly.map(p=>`${wx(p.x).toFixed(1)},${wy(p.y).toFixed(1)}`).join(' ');
+    const cx = o.poly.reduce((a,p)=>a+p.x,0)/o.poly.length, cy = o.poly.reduce((a,p)=>a+p.y,0)/o.poly.length;
+    s += `<polygon points="${pts}" fill="${ROOM_COLOR[o.type]}" stroke="#221F1B" stroke-width="2.5"/>`;
+    s += `<text x="${wx(cx)}" y="${wy(cy)-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
+    s += `<text x="${wx(cx)}" y="${wy(cy)+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${polyArea(o.poly).toFixed(1)} ตร.ม.</text>`;
+  } else {
+    const x=wx(o.x), y=wy(o.y), w=px(o.w), h=px(o.h);
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROOM_COLOR[o.type]}" stroke="#221F1B" stroke-width="2.5"/>`;
+    s += `<text x="${x+w/2}" y="${y+h/2-4}" text-anchor="middle" font-size="14" font-weight="600" fill="#221F1B">${o.label}</text>`;
+    s += `<text x="${x+w/2}" y="${y+h/2+14}" text-anchor="middle" font-size="11.5" fill="#6E675C">${o.w.toFixed(1)}×${o.h.toFixed(1)} ม.</text>`;
+  }
   s += `</g>`;
-  if (sel) s += selOutline(o) + handles(o);
+  if (sel) s += selOutline(o) + (o.poly ? '' : handles(o));
   return s;
 }
 function drawRoomBackdrop(o){
@@ -571,9 +696,9 @@ function renderCanvas(){
   s += `<polygon points="${landPts}" fill="#F1ECDC" stroke="#B7AE93" stroke-width="1.6" stroke-dasharray="7 4"/>`;
   const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
   const [pFL,pFR,pBR,pBL] = land.pts;
-  const sideLabel=(a,b,text,dx,dy)=>{ const m=mid(a,b); return `<text x="${(lx(m.x)+dx).toFixed(1)}" y="${(ly(m.y)+dy).toFixed(1)}" text-anchor="middle" font-size="11.5" fill="#9C9276" font-family="JetBrains Mono,monospace">${text}</text>`; };
-  s += sideLabel(pFL,pFR, `หน้า ${state.land.front.toFixed(1)} ม.`, 0, -8);
-  s += sideLabel(pBL,pBR, `หลัง ${state.land.back.toFixed(1)} ม.`, 0, 18);
+  const sideLabel=(a,b,text,dx,dy)=>{ const m=mid(a,b); return `<text x="${(lx(m.x)+dx).toFixed(1)}" y="${(ly(m.y)+dy).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="600" fill="#8C8468" font-family="Sarabun,sans-serif">${text}</text>`; };
+  s += sideLabel(pFL,pFR, `หลัง ${state.land.front.toFixed(1)} ม.`, 0, -8);
+  s += sideLabel(pBL,pBR, `หน้า ${state.land.back.toFixed(1)} ม.`, 0, 18);
   s += sideLabel(pFL,pBL, `ซ้าย ${state.land.left.toFixed(1)} ม.`, -30, 0);
   s += sideLabel(pFR,pBR, `ขวา ${state.land.right.toFixed(1)} ม.`, 30, 0);
   s += drawNorthArrow(null, land, HOUSE_OFFSET, W, D, [], true);
@@ -582,7 +707,7 @@ function renderCanvas(){
   const houseStroke = movingHouse ? cssVar('--accent') : '#CDC5B2';
   const houseFill = movingHouse ? 'rgba(124,48,72,0.06)' : 'none';
   s += `<rect x="${wx(0)}" y="${wy(0)}" width="${px(W)}" height="${px(D)}" fill="${houseFill}" stroke="${houseStroke}" stroke-width="${movingHouse?2.2:1.5}" stroke-dasharray="5 4"/>`;
-  s += `<text x="${wx(W/2)}" y="${wy(0)-10}" text-anchor="middle" font-size="14" fill="${cssVar('--accent')}" font-family="Caveat,cursive">บ้านกว้าง ${W.toFixed(1)}×${D.toFixed(1)} ม. · หน้าบ้านทิศ${dirLabelFor(state.frontFacing).split(' ')[0]}</text>`;
+  s += `<text x="${wx(W/2)}" y="${wy(0)-10}" text-anchor="middle" font-size="13" font-weight="700" fill="${cssVar('--accent')}" font-family="Sarabun,sans-serif">บ้านกว้าง ${W.toFixed(1)}×${D.toFixed(1)} ม. · ทิศเหนืออยู่ทาง${northSideLabel()}ที่ดิน</text>`;
 
   const f = curFloor();
   if (state.view==='plan2d'){
@@ -597,6 +722,14 @@ function renderCanvas(){
       const x=wx(previewRoom.x), y=wy(previewRoom.y), w=px(previewRoom.w), h=px(previewRoom.h);
       s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(124,48,72,0.08)" stroke="${cssVar('--accent')}" stroke-width="2" stroke-dasharray="6 4"/>`;
     }
+    if (drawingPoly && drawingPoly.points.length){
+      const pts = drawingPoly.points;
+      const d = pts.map((p,i)=>`${i===0?'M':'L'} ${wx(p.x).toFixed(1)} ${wy(p.y).toFixed(1)}`).join(' ');
+      s += `<path d="${d}" fill="none" stroke="${cssVar('--accent')}" stroke-width="2" stroke-dasharray="6 4"/>`;
+      pts.forEach((p,i)=>{
+        s += `<circle cx="${wx(p.x).toFixed(1)}" cy="${wy(p.y).toFixed(1)}" r="${i===0?7:5}" fill="${i===0?cssVar('--accent'):'#fff'}" stroke="${cssVar('--accent')}" stroke-width="2"/>`;
+      });
+    }
   } else if (state.view==='electrical'){
     f.objects.filter(o=>o.kind==='room').forEach(o=>s+=drawRoomBackdrop(o));
     f.electrical.filter(o=>o.kind==='wire').forEach(o=>s+=drawConnector(o, f.electrical, o.id===selectedId, '#D98A4B'));
@@ -606,8 +739,19 @@ function renderCanvas(){
     f.plumbing.filter(o=>o.kind==='pipe').forEach(o=>s+=drawConnector(o, f.plumbing, o.id===selectedId, '#4A7FA8'));
     f.plumbing.filter(o=>o.kind==='plumbPoint').forEach(o=>s+=drawPoint(o,o.id===selectedId,PLUMB_PALETTE));
   }
+  s += drawScribbles(f.scribbles||[]);
+  if (drawingScribble && drawingScribble.points.length>1) s += scribbleToSvg(drawingScribble.points, true);
   s += `</svg>`;
   els.canvasWrap.innerHTML = s;
+}
+
+function scribbleToSvg(points, isPreview){
+  const d = points.map((p,i)=>`${i===0?'M':'L'} ${wx(p.x).toFixed(1)} ${wy(p.y).toFixed(1)}`).join(' ');
+  const opacity = isPreview ? 0.75 : 0.92;
+  return `<path d="${d}" fill="none" stroke="#C0392B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"/>`;
+}
+function drawScribbles(list){
+  return list.map(sc=>scribbleToSvg(sc.points,false)).join('');
 }
 
 /* ---------------- 3D exterior (pure math projection) ---------------- */
@@ -698,8 +842,11 @@ function renderElevation3D(){
   const landPts3d = land.pts.map(p=>P(p.x-(offs.x+W/2), 0.01, p.y-(offs.y+D/2)));
   groundSvg += `<polygon points="${landPts3d.map(p=>`${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ')}" fill="#EFE9D9" stroke="#C7BE9F" stroke-width="1.4" stroke-dasharray="5 3"/>`;
 
+  let floorBases = []; let acc = 0;
+  for (let fl=0; fl<state.floors; fl++){ floorBases.push(acc); acc += (floorsData[fl] && floorsData[fl].height) || 3; }
+
   for (let fl=0; fl<state.floors; fl++){
-    const yBase = fl*FLOOR_H;
+    const yBase = floorBases[fl];
     const floor = floorsData[fl] || { objects:[] };
 
     // floor slab
@@ -719,6 +866,11 @@ function renderElevation3D(){
 
     // rooms — flat colored floor patches (like the 2D plan, painted on the slab) so the layout reads at a glance
     (floor.objects||[]).filter(o=>o.kind==='room').forEach(o=>{
+      if (o.poly && o.poly.length>=3){
+        const pts3d = o.poly.map(p=>P(p.x-hw, yBase+0.03, p.y-hd));
+        items.push({ depth: avgDepth(pts3d)-0.01, svg: poly(pts3d, ROOM_COLOR[o.type]||'#EAE7E0') });
+        return;
+      }
       const x0=o.x-hw, z0=o.y-hd;
       const p1=P(x0,yBase+0.03,z0), p2=P(x0+o.w,yBase+0.03,z0), p3=P(x0+o.w,yBase+0.03,z0+o.h), p4=P(x0,yBase+0.03,z0+o.h);
       items.push({ depth: avgDepth([p1,p2,p3,p4])-0.01, svg: poly([p1,p2,p3,p4], ROOM_COLOR[o.type]||'#EAE7E0') });
@@ -752,7 +904,7 @@ function renderElevation3D(){
 
   items.sort((a,b)=>a.depth-b.depth);
 
-  const topH = state.floors*FLOOR_H;
+  const topH = acc;
   const allPts = [P(-hw,0,hd),P(hw,0,hd),P(-hw,0,-hd),P(hw,0,-hd),
                    P(-hw,topH,hd),P(hw,topH,hd),P(-hw,topH,-hd),P(hw,topH,-hd),
                    ...landPts3d,...gCorners];
@@ -793,7 +945,7 @@ function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
 function hitTestHandle(pt){
   if (!selectedId || state.view!=='plan2d') return null;
   const o = findObj(selectedId);
-  if (!o || o.kind!=='room') return null;
+  if (!o || o.kind!=='room' || o.poly) return null;
   const corners = { tl:[o.x,o.y], tr:[o.x+o.w,o.y], bl:[o.x,o.y+o.h], br:[o.x+o.w,o.y+o.h] };
   const thresh = 0.3;
   for (const k in corners){ const [cx,cy]=corners[k]; if (Math.abs(pt.x-cx)<thresh && Math.abs(pt.y-cy)<thresh) return {handle:k, room:o}; }
@@ -837,6 +989,29 @@ function anchorFor(handle, room){
 }
 
 /* ---------------- pointer interaction (drag / pan / pinch-zoom) ---------------- */
+function updatePolyBar(){ els.polyActions.style.display = drawingPoly ? 'flex' : 'none'; }
+function finishPoly(){
+  if (!drawingPoly || drawingPoly.points.length<3){ drawingPoly=null; updatePolyBar(); renderCanvas(); return; }
+  const pts = drawingPoly.points;
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  const bx=Math.min(...xs), by=Math.min(...ys), bw=Math.max(0.3,Math.max(...xs)-bx), bh=Math.max(0.3,Math.max(...ys)-by);
+  const obj = { id:'o'+(uid++), kind:'room', type:'other', label:ROOM_LABEL['other'], poly: pts.map(p=>({x:p.x,y:p.y})), x:bx, y:by, w:bw, h:bh };
+  curFloor().objects.push(obj);
+  selectedId = obj.id;
+  drawingPoly = null;
+  updatePolyBar();
+  renderProps(); renderCanvas(); pushHistory();
+}
+function cancelPoly(){ drawingPoly=null; updatePolyBar(); renderCanvas(); }
+function undoPolyPoint(){
+  if (!drawingPoly) return;
+  if (drawingPoly.points.length>1) drawingPoly.points.pop(); else { drawingPoly=null; updatePolyBar(); }
+  renderCanvas();
+}
+els.polyFinish.addEventListener('click', finishPoly);
+els.polyUndo.addEventListener('click', undoPolyPoint);
+els.polyCancel.addEventListener('click', cancelPoly);
+
 function onCanvasDown(e){
   activePointers.set(e.pointerId, {x:e.clientX,y:e.clientY});
   try { els.canvasWrap.setPointerCapture(e.pointerId); } catch(err){}
@@ -855,6 +1030,28 @@ function onCanvasDown(e){
   const hHit = hitTestHandle(pt);
   if (hHit){ resizing = { room:hHit.room, anchor: anchorFor(hHit.handle, hHit.room) }; e.preventDefault(); return; }
 
+  if (currentTool==='pen'){
+    drawingScribble = { id:'s'+(uid++), points:[{x:pt.x,y:pt.y}] };
+    e.preventDefault();
+    return;
+  }
+
+  if (currentTool==='freeroom'){
+    const cx = clamp(snap(pt.x),0,state.width), cy = clamp(snap(pt.y),0,state.depth);
+    if (!drawingPoly){
+      drawingPoly = { points:[{x:cx,y:cy}] };
+    } else {
+      const first = drawingPoly.points[0];
+      const near = drawingPoly.points.length>=3 && Math.hypot(cx-first.x, cy-first.y) < 0.35;
+      if (near) finishPoly();
+      else drawingPoly.points.push({x:cx,y:cy});
+    }
+    updatePolyBar();
+    renderCanvas();
+    e.preventDefault();
+    return;
+  }
+
   if (currentTool==='wire'){
     const hit = hitTestObject(pt);
     if (hit && (hit.kind==='elecPoint' || hit.kind==='plumbPoint')){
@@ -863,6 +1060,7 @@ function onCanvasDown(e){
         const kind = state.view==='electrical' ? 'wire' : 'pipe';
         activeArray().push({ id:'o'+(uid++), kind, fromId:wireStart, toId:hit.id });
         wireStart = null; selectedId=null; closeSheet(); renderCanvas();
+        pushHistory();
       }
     }
     return;
@@ -894,18 +1092,19 @@ function onCanvasDown(e){
     const def = DEFAULTS[currentTool];
     const cx=clamp(snap(pt.x-def.w/2),0,state.width-def.w), cy=clamp(snap(pt.y-def.h/2),0,state.depth-def.h);
     const obj = { id:'o'+(uid++), kind:currentTool, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
-    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
+    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas(); pushHistory();
   } else if (currentTool==='furniture' && currentSubtype){
     const def = DEFAULTS[currentSubtype];
-    const cx=clamp(snap(pt.x-def.w/2),0,state.width-def.w), cy=clamp(snap(pt.y-def.h/2),0,state.depth-def.h);
+    const b = objBounds(currentSubtype, def.w, def.h);
+    const cx=clamp(snap(pt.x-def.w/2),b.minX,b.maxX), cy=clamp(snap(pt.y-def.h/2),b.minY,b.maxY);
     const obj = { id:'o'+(uid++), kind:'furniture', subtype:currentSubtype, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
-    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
+    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas(); pushHistory();
   } else if (currentTool==='point' && currentSubtype){
     const def = DEFAULTS[currentSubtype];
     const cx=clamp(snap(pt.x-def.w/2),0,state.width-def.w), cy=clamp(snap(pt.y-def.h/2),0,state.depth-def.h);
     const kind = state.view==='electrical' ? 'elecPoint' : 'plumbPoint';
     const obj = { id:'o'+(uid++), kind, subtype:currentSubtype, x:cx, y:cy, w:def.w, h:def.h, rotation:0 };
-    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas();
+    activeArray().push(obj); selectedId=obj.id; renderProps(); renderCanvas(); pushHistory();
   } else {
     const insideHouse = state.view==='plan2d' && currentTool==='select' &&
       pt.x>=-0.05 && pt.x<=state.width+0.05 && pt.y>=-0.05 && pt.y<=state.depth+0.05;
@@ -926,6 +1125,14 @@ function onCanvasDown(e){
 
 function onCanvasMove(e){
   if (activePointers.has(e.pointerId)) activePointers.set(e.pointerId, {x:e.clientX,y:e.clientY});
+
+  if (drawingScribble){
+    const pt = toMeters(e);
+    const pts = drawingScribble.points;
+    const last = pts[pts.length-1];
+    if (Math.hypot(pt.x-last.x, pt.y-last.y) > 0.04){ pts.push({x:pt.x,y:pt.y}); renderCanvas(); }
+    return;
+  }
 
   if (pinch && activePointers.size>=2){
     const pts=[...activePointers.values()].slice(0,2);
@@ -977,7 +1184,13 @@ function onCanvasMove(e){
   if (movingId){
     const pt = toMeters(e);
     const o = findObj(movingId);
-    if (o){ o.x=clamp(snap(pt.x-dragOffset.x),0,state.width-o.w); o.y=clamp(snap(pt.y-dragOffset.y),0,state.depth-o.h); renderCanvas(); }
+    if (o){
+      const b=objBounds(o.subtype,o.w,o.h);
+      const nx = clamp(snap(pt.x-dragOffset.x),b.minX,b.maxX), ny = clamp(snap(pt.y-dragOffset.y),b.minY,b.maxY);
+      if (o.poly && o.poly.length){ const dx=nx-o.x, dy=ny-o.y; o.poly = o.poly.map(p=>({x:p.x+dx,y:p.y+dy})); }
+      o.x = nx; o.y = ny;
+      renderCanvas();
+    }
     return;
   }
   if (resizing){
@@ -1007,9 +1220,22 @@ function onCanvasUp(e){
   dragging3d = false;
   clearTimeout(houseMoveTimer);
 
+  if (drawingScribble){
+    if (drawingScribble.points.length>1){
+      const cf = curFloor();
+      if (!cf.scribbles) cf.scribbles = [];
+      cf.scribbles.push(drawingScribble);
+    }
+    drawingScribble = null;
+    renderCanvas();
+    pushHistory();
+    return;
+  }
+
   if (movingHouse){
     movingHouse = false; panning = false;
     renderCanvas();
+    pushHistory();
     return;
   }
 
@@ -1024,8 +1250,10 @@ function onCanvasUp(e){
     const obj = { id:'o'+(uid++), kind:'room', x:previewRoom.x, y:previewRoom.y, w, h, type:'other', label:ROOM_LABEL['other'] };
     curFloor().objects.push(obj); selectedId=obj.id;
   }
+  const hadEdit = movingId || resizing || (drawingRoom && previewRoom);
   movingId=null; dragOffset=null; resizing=null; drawingRoom=null; previewRoom=null;
   renderProps(); renderCanvas();
+  if (hadEdit) pushHistory();
 }
 
 els.canvasWrap.addEventListener('pointerdown', onCanvasDown);
@@ -1081,22 +1309,41 @@ document.getElementById('zoomReset').onclick=resetZoom;
 
 /* ---------------- top-level controls ---------------- */
 els.widthInput.addEventListener('input', e=>{ state.width=clamp(parseFloat(e.target.value)||8,3,30); renderCanvas(); });
+els.widthInput.addEventListener('change', ()=>pushHistory());
 els.depthInput.addEventListener('input', e=>{ state.depth=clamp(parseFloat(e.target.value)||9.5,3,30); renderCanvas(); });
+els.depthInput.addEventListener('change', ()=>pushHistory());
 els.floorsInput.addEventListener('input', e=>{ state.floors=clamp(parseInt(e.target.value)||1,1,4); syncFloors(); buildFloorTabs(); renderCanvas(); });
+els.floorsInput.addEventListener('change', ()=>pushHistory());
+els.floorHeightInput.addEventListener('input', e=>{
+  const cf = floorsData[state.activeFloor];
+  if (cf) cf.height = clamp(parseFloat(e.target.value)||3, 2, 6);
+});
+els.floorHeightInput.addEventListener('change', ()=>{ renderCanvas(); pushHistory(); });
 
 els.landFrontInput.addEventListener('input', e=>{ state.land.front=clamp(parseFloat(e.target.value)||12,3,80); renderCanvas(); });
+els.landFrontInput.addEventListener('change', ()=>pushHistory());
 els.landBackInput.addEventListener('input', e=>{ state.land.back=clamp(parseFloat(e.target.value)||12,3,80); renderCanvas(); });
+els.landBackInput.addEventListener('change', ()=>pushHistory());
 els.landLeftInput.addEventListener('input', e=>{ state.land.left=clamp(parseFloat(e.target.value)||16,3,80); renderCanvas(); });
+els.landLeftInput.addEventListener('change', ()=>pushHistory());
 els.landRightInput.addEventListener('input', e=>{ state.land.right=clamp(parseFloat(e.target.value)||16,3,80); renderCanvas(); });
+els.landRightInput.addEventListener('change', ()=>pushHistory());
 
-els.frontFacingInput.innerHTML = DIRS8.map(d=>`<option value="${d.v}">${d.label}</option>`).join('');
-els.frontFacingInput.value = state.frontFacing;
-els.frontFacingInput.addEventListener('change', e=>{ state.frontFacing = parseInt(e.target.value)||0; renderCanvas(); });
+els.frontFacingInput.innerHTML = NORTH_SIDE_OPTS.map(d=>`<option value="${d.v}">${d.label}</option>`).join('');
+els.frontFacingInput.value = state.northSide;
+applyNorthSide();
+els.frontFacingInput.addEventListener('change', e=>{
+  state.northSide = e.target.value; applyNorthSide();
+  els.northSummary.textContent = `🧭 ทิศเหนืออยู่ทาง${northSideLabel()}ของที่ดิน`;
+  renderCanvas();
+  pushHistory();
+});
 
 document.getElementById('clearBtn').onclick = ()=>{
   const key = activeArrayKey();
   curFloor()[key] = [];
   selectedId=null; closeSheet(); renderCanvas();
+  pushHistory();
 };
 
 document.getElementById('downloadBtn').onclick = ()=>{
@@ -1119,9 +1366,204 @@ document.getElementById('downloadBtn').onclick = ()=>{
   img.src = url;
 };
 
+/* ---------------- undo / redo ---------------- */
+let history = [], historyIndex = -1, restoringHistory = false;
+const HISTORY_MAX = 60;
+function snapshotData(){ return JSON.stringify({ state, floorsData }); }
+function pushHistory(){
+  if (restoringHistory) return;
+  const snap = snapshotData();
+  if (historyIndex>=0 && history[historyIndex]===snap) { updateUndoRedoButtons(); return; }
+  history = history.slice(0, historyIndex+1);
+  history.push(snap);
+  historyIndex = history.length-1;
+  if (history.length > HISTORY_MAX){ history.shift(); historyIndex = history.length-1; }
+  updateUndoRedoButtons();
+}
+function restoreSnapshot(snap){
+  const data = JSON.parse(snap);
+  restoringHistory = true;
+  Object.keys(state).forEach(k=>delete state[k]);
+  Object.assign(state, data.state);
+  floorsData = data.floorsData;
+  if (state.activeFloor >= floorsData.length) state.activeFloor = floorsData.length-1;
+  selectedId = null; closeSheet();
+  syncSettingsInputsFromState();
+  renderCanvas();
+  restoringHistory = false;
+}
+function undo(){ if (historyIndex>0){ historyIndex--; restoreSnapshot(history[historyIndex]); updateUndoRedoButtons(); } }
+function redo(){ if (historyIndex<history.length-1){ historyIndex++; restoreSnapshot(history[historyIndex]); updateUndoRedoButtons(); } }
+function updateUndoRedoButtons(){
+  els.undoBtn.disabled = historyIndex<=0;
+  els.redoBtn.disabled = historyIndex>=history.length-1;
+}
+els.undoBtn.addEventListener('click', undo);
+els.redoBtn.addEventListener('click', redo);
+window.addEventListener('keydown', e=>{
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if (tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return;
+  if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key.toLowerCase()==='z'){ e.preventDefault(); undo(); }
+  else if ((e.ctrlKey||e.metaKey) && (e.key.toLowerCase()==='y' || (e.shiftKey && e.key.toLowerCase()==='z'))){ e.preventDefault(); redo(); }
+});
+
+function syncSettingsInputsFromState(){
+  els.widthInput.value = state.width; els.depthInput.value = state.depth; els.floorsInput.value = state.floors;
+  els.landFrontInput.value = state.land.front; els.landBackInput.value = state.land.back;
+  els.landLeftInput.value = state.land.left; els.landRightInput.value = state.land.right;
+  els.frontFacingInput.value = state.northSide || 'back';
+  els.northSummary.textContent = `🧭 ทิศเหนืออยู่ทาง${northSideLabel()}ของที่ดิน`;
+  buildFloorTabs(); buildToolbar();
+}
+
+/* ---------------- save / open projects (works when opened inside claude.ai, and as a standalone downloaded file) ---------------- */
+const Persist = {
+  async get(key){
+    if (window.storage){ try{ const r = await window.storage.get(key,false); return r?r.value:null; }catch(e){ return null; } }
+    try{ return localStorage.getItem(key); }catch(e){ return null; }
+  },
+  async set(key,val){
+    if (window.storage){ try{ await window.storage.set(key,val,false); return true; }catch(e){ return false; } }
+    try{ localStorage.setItem(key,val); return true; }catch(e){ return false; }
+  },
+  async del(key){
+    if (window.storage){ try{ await window.storage.delete(key,false); return true; }catch(e){ return false; } }
+    try{ localStorage.removeItem(key); return true; }catch(e){ return false; }
+  }
+};
+const PROJECT_INDEX_KEY = 'houseplan_projects_index';
+let currentProjectId = null;
+
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function listProjects(){
+  const raw = await Persist.get(PROJECT_INDEX_KEY);
+  try{ return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+}
+async function saveProjectIndex(list){ await Persist.set(PROJECT_INDEX_KEY, JSON.stringify(list)); }
+
+async function saveCurrentProject(){
+  const name = (els.projectNameInput.value||'โครงการที่ไม่มีชื่อ').trim() || 'โครงการที่ไม่มีชื่อ';
+  const id = currentProjectId || ('proj_'+Date.now()+'_'+Math.floor(Math.random()*1e4));
+  currentProjectId = id;
+  const payload = { name, savedAt: Date.now(), state, floorsData };
+  const ok = await Persist.set('houseplan_project:'+id, JSON.stringify(payload));
+  if (!ok){ alert('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง หรือใช้ปุ่ม "ส่งออกไฟล์" แทน'); return; }
+  let list = await listProjects();
+  list = list.filter(p=>p.id!==id);
+  list.unshift({ id, name, savedAt: payload.savedAt });
+  await saveProjectIndex(list);
+  await renderProjectsList();
+  flashSaved();
+}
+async function loadProject(id){
+  const raw = await Persist.get('houseplan_project:'+id);
+  if (!raw){ alert('เปิดโครงการไม่สำเร็จ'); return; }
+  try{
+    const payload = JSON.parse(raw);
+    currentProjectId = id;
+    Object.keys(state).forEach(k=>delete state[k]);
+    Object.assign(state, payload.state);
+    floorsData = payload.floorsData;
+    if (state.activeFloor>=floorsData.length) state.activeFloor=0;
+    els.projectNameInput.value = payload.name||'';
+    selectedId=null; closeSheet();
+    syncSettingsInputsFromState();
+    history=[]; historyIndex=-1; pushHistory();
+    renderCanvas();
+    els.projectsPanel.classList.remove('open');
+  }catch(e){ alert('ไฟล์โครงการเสียหาย เปิดไม่สำเร็จ'); }
+}
+async function deleteProject(id){
+  await Persist.del('houseplan_project:'+id);
+  let list = await listProjects();
+  list = list.filter(p=>p.id!==id);
+  await saveProjectIndex(list);
+  await renderProjectsList();
+}
+async function renderProjectsList(){
+  const list = await listProjects();
+  if (!list.length){ els.projectsList.innerHTML = '<div class="project-empty">ยังไม่มีโครงการที่บันทึกไว้ในเครื่องนี้</div>'; return; }
+  els.projectsList.innerHTML = list.map(p=>`
+    <div class="project-row" data-id="${p.id}">
+      <div>
+        <div class="pname">${escapeHtml(p.name)}</div>
+        <div class="pmeta">${new Date(p.savedAt).toLocaleString('th-TH')}</div>
+      </div>
+      <div class="prow-actions">
+        <button class="load-btn" style="background:var(--accent);color:#fff;">เปิด</button>
+        <button class="del-btn" style="background:#F3E3E4;color:#9B3A44;">ลบ</button>
+      </div>
+    </div>`).join('');
+  els.projectsList.querySelectorAll('.project-row').forEach(row=>{
+    const id = row.dataset.id;
+    row.querySelector('.load-btn').onclick = ()=>loadProject(id);
+    row.querySelector('.del-btn').onclick = ()=>{ if (confirm('ลบโครงการนี้ออกจากรายการที่บันทึกไว้?')) deleteProject(id); };
+  });
+}
+function flashSaved(){
+  const b = els.saveProjectBtn, old = b.textContent;
+  b.textContent = '✅ บันทึกแล้ว';
+  setTimeout(()=>{ b.textContent = old; }, 1400);
+}
+function newProject(){
+  if (!confirm('เริ่มโครงการใหม่? งานปัจจุบันที่ยังไม่ได้บันทึกจะหายไป')) return;
+  currentProjectId = null;
+  Object.keys(state).forEach(k=>delete state[k]);
+  Object.assign(state, {
+    width:8, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
+    land:{ front:12, back:12, left:16, right:16 }, frontFacing:0, northSide:'back', houseOffset:null
+  });
+  floorsData = [ mkFloor() ];
+  els.projectNameInput.value = 'โครงการใหม่';
+  syncSettingsInputsFromState();
+  selectedId=null; closeSheet();
+  history=[]; historyIndex=-1; pushHistory();
+  buildViewTabs();
+  renderCanvas();
+}
+
+els.saveProjectBtn.addEventListener('click', saveCurrentProject);
+els.newProjectBtn.addEventListener('click', newProject);
+els.projectsToggle.addEventListener('click', async ()=>{
+  const opening = !els.projectsPanel.classList.contains('open');
+  els.projectsPanel.classList.toggle('open');
+  if (opening) await renderProjectsList();
+});
+
+els.exportProjectBtn.addEventListener('click', ()=>{
+  const payload = { name: els.projectNameInput.value||'house-plan', savedAt: Date.now(), state, floorsData };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=(payload.name||'house-plan')+'.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+els.importProjectBtn.addEventListener('click', ()=>els.importProjectFile.click());
+els.importProjectFile.addEventListener('change', e=>{
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const payload = JSON.parse(reader.result);
+      currentProjectId = null;
+      Object.keys(state).forEach(k=>delete state[k]);
+      Object.assign(state, payload.state);
+      floorsData = payload.floorsData;
+      if (state.activeFloor>=floorsData.length) state.activeFloor=0;
+      els.projectNameInput.value = payload.name||'โครงการที่นำเข้า';
+      syncSettingsInputsFromState(); selectedId=null; closeSheet();
+      history=[]; historyIndex=-1; pushHistory();
+      renderCanvas();
+    }catch(err){ alert('ไฟล์ไม่ถูกต้อง เปิดไม่สำเร็จ'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
 /* ---------------- init ---------------- */
-function refreshAll(){ buildViewTabs(); buildFloorTabs(); buildToolbar(); renderProps(); renderCanvas(); }
+function refreshAll(){ syncSettingsInputsFromState(); buildViewTabs(); buildFloorTabs(); buildToolbar(); renderProps(); renderCanvas(); }
 refreshAll();
+pushHistory();
 </script>
 </body>
 </html>
