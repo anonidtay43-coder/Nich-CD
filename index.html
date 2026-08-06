@@ -1441,15 +1441,50 @@ document.getElementById('downloadBtn').onclick = ()=>{
   const url = URL.createObjectURL(blob);
   const img = new Image();
   img.onload = ()=>{
+    const drawNow = ()=>{
     const factor=2;
+    const svgW = svgEl.viewBox.baseVal.width*factor;
+    const svgH = svgEl.viewBox.baseVal.height*factor;
+
+    const projectName = (els.projectNameInput.value||'').trim() || 'โครงการที่ไม่มีชื่อ';
+    const viewObj = VIEWS.find(v=>v.key===state.view);
+    const viewLabel = viewObj ? viewObj.label : '';
+    const floorLabel = state.view==='elevation3d' ? '' : `ชั้นที่ ${state.activeFloor+1}`;
+
+    const headerH = Math.round(96*factor/2); // fixed header band height, scales with factor
     const canvas=document.createElement('canvas');
-    canvas.width = svgEl.viewBox.baseVal.width*factor;
-    canvas.height = svgEl.viewBox.baseVal.height*factor;
+    canvas.width = svgW;
+    canvas.height = svgH + headerH;
     const ctx=canvas.getContext('2d');
+
+    // header band
     ctx.fillStyle='#FBF9F4'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#221F1B'; ctx.fillRect(0,0,canvas.width,headerH);
+    ctx.strokeStyle='#7C3048'; ctx.lineWidth=Math.max(2,2*factor);
+    ctx.beginPath(); ctx.moveTo(0,headerH); ctx.lineTo(canvas.width,headerH); ctx.stroke();
+
+    // header text
+    const pad = 18*factor;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${16*factor}px Sarabun, sans-serif`;
+    ctx.fillText(projectName, pad, headerH*0.42);
+    ctx.fillStyle = '#E4DFD3';
+    ctx.font = `500 ${12.5*factor}px Sarabun, sans-serif`;
+    const subLine = [viewLabel, floorLabel].filter(Boolean).join(' · ');
+    ctx.fillText(subLine, pad, headerH*0.42 + 16*factor*1.35);
+
+    // plan/elevation image below header
+    ctx.drawImage(img,0,headerH,svgW,svgH);
     URL.revokeObjectURL(url);
-    canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`${state.view}-ชั้น${state.activeFloor+1}.png`; a.click(); });
+    canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`${projectName}-${state.view}-ชั้น${state.activeFloor+1}.png`; a.click(); });
+    };
+    if (document.fonts && document.fonts.ready){
+      Promise.all([
+        document.fonts.load(`700 32px Sarabun`),
+        document.fonts.load(`500 25px Sarabun`)
+      ]).then(()=>document.fonts.ready).then(drawNow).catch(drawNow);
+    } else { drawNow(); }
   };
   img.src = url;
 };
