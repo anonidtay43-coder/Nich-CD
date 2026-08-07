@@ -230,9 +230,9 @@ const MARGIN = { top:34, right:34, bottom:34, left:34 };
 const FLOOR_H = 3;
 let uid = 1;
 
-const state = { width:7, depth:10, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
+const state = { width:7, depth:9.5, floors:1, activeFloor:0, view:'plan2d', houseColor:'#D6C8AC',
   land:{ front:11, back:11, left:15, right:15 }, frontFacing:0, northSide:'back', houseOffset:null,
-  floorColor:null, wallColor:'#221F1B', showFurniture:true, showLabels:true };
+  floorColor:null, wallColor:'#2F5C99', showFurniture:true, showLabels:true };
 
 const PALETTE_COLORS = [
   {v:'#FFFFFF', name:'ขาว'}, {v:'#FBEEDA', name:'ครีมไข่'}, {v:'#B98A5E', name:'น้ำตาล'},
@@ -247,8 +247,30 @@ function backfillStateDefaults(){
   if (state.showLabels===undefined) state.showLabels=true;
 }
 let HOUSE_OFFSET = { x:0, y:0 };
-let floorsData = [ mkFloor() ];
 function mkFloor(){ return { objects:[], electrical:[], plumbing:[], scribbles:[], height:3 }; }
+let floorsData = [
+  {
+    "objects": [
+      { "id": "o1", "kind": "room", "x": 0, "y": 0, "w": 3.5, "h": 4, "type": "bedroom", "label": "นอน3" },
+      { "id": "o4", "kind": "room", "x": 4, "y": 4, "w": 3, "h": 1.5, "type": "bathroom", "label": "" },
+      { "id": "o5", "kind": "room", "x": 3.5, "y": 0, "w": 3.5, "h": 4, "type": "bedroom", "label": "นอน2" },
+      { "id": "o6", "kind": "room", "x": 3.5, "y": 5.5, "w": 3.5, "h": 4, "type": "bedroom", "label": "นอน1" },
+      { "id": "o7", "kind": "furniture", "subtype": "bed", "x": 2.4000000000000004, "y": 0.1, "w": 1, "h": 1.8, "rotation": 0 },
+      { "id": "o9", "kind": "furniture", "subtype": "toilet", "x": 6.2, "y": 4.5, "w": 0.45, "h": 0.65, "rotation": 0 },
+      { "id": "o11", "kind": "furniture", "subtype": "bed", "x": 5.800000000000001, "y": 0.1, "w": 1, "h": 1.8, "rotation": 0 },
+      { "id": "o12", "kind": "furniture", "subtype": "wardrobe", "x": 5.5, "y": 2.9000000000000004, "w": 1.2, "h": 0.6, "rotation": 0 },
+      { "id": "o23", "kind": "room", "x": 0, "y": 4, "w": 3.5, "h": 5.5, "type": "living", "label": "รับแขก" },
+      { "id": "o25", "kind": "door", "x": 1.5, "y": 3.1, "w": 0.9, "h": 0.9, "rotation": 180 },
+      { "id": "o26", "kind": "door", "x": 4.2, "y": 3.1, "w": 0.9, "h": 0.9, "rotation": 180 },
+      { "id": "o27", "kind": "door", "x": 3.6, "y": 7.1000000000000005, "w": 0.9, "h": 0.9, "rotation": 270 },
+      { "id": "o31", "kind": "furniture", "subtype": "bed", "x": 5.6000000000000005, "y": 7.7, "w": 1, "h": 1.8, "rotation": 90 }
+    ],
+    "electrical": [],
+    "plumbing": [],
+    "scribbles": [],
+    "height": 3
+  }
+];
 
 let currentTool = 'select';
 let currentSubtype = null;
@@ -258,6 +280,8 @@ let wireStart = null;
 let movingId=null, dragOffset=null, resizing=null, drawingRoom=null, previewRoom=null;
 let movingHouse=false, houseMoveTimer=null, houseDragStartInternal=null, houseDragOffsetStart=null;
 let lastTap = { id:null, time:0 };
+let objLongPressTimer = null, objPressMoved = false, objPressStart = null;
+const OBJ_LONG_PRESS_MS = 480;
 let drawingScribble = null;
 let drawingPoly = null;
 let viewport = { x:0, y:0, zoom:1 };
@@ -315,7 +339,7 @@ function populateStarterFloor(floor){
     mkFurn('wardrobe',5.4,5.1),
   );
 }
-populateStarterFloor(floorsData[0]);
+uid = 32; // continue id numbering after the highest id already used in the loaded project (o31)
 
 
 
@@ -1152,12 +1176,17 @@ function onCanvasDown(e){
   if (hit){
     const draggable = hit.kind!=='wire' && hit.kind!=='pipe';
     if (draggable){
-      const now = Date.now();
-      const isDouble = (lastTap.id===hit.id) && (now-lastTap.time<400);
-      lastTap = { id:hit.id, time:now };
       selectedId = hit.id;
       movingId = hit.id; dragOffset = {x:pt.x-hit.x, y:pt.y-hit.y};
-      if (isDouble) renderProps(); else closeSheet();
+      closeSheet();
+      objPressMoved = false;
+      objPressStart = { x:e.clientX, y:e.clientY };
+      clearTimeout(objLongPressTimer);
+      objLongPressTimer = setTimeout(()=>{
+        if (!objPressMoved && movingId===hit.id){
+          renderProps();
+        }
+      }, OBJ_LONG_PRESS_MS);
     } else {
       selectedId = hit.id;
       renderProps();
@@ -1264,6 +1293,10 @@ function onCanvasMove(e){
   }
 
   if (movingId){
+    if (!objPressMoved && objPressStart){
+      const dx = e.clientX-objPressStart.x, dy = e.clientY-objPressStart.y;
+      if (Math.hypot(dx,dy) > 6){ objPressMoved = true; clearTimeout(objLongPressTimer); }
+    }
     const pt = toMeters(e);
     const o = findObj(movingId);
     if (o){
@@ -1301,6 +1334,7 @@ function onCanvasUp(e){
   if (activePointers.size<2) pinch = null;
   dragging3d = false;
   clearTimeout(houseMoveTimer);
+  clearTimeout(objLongPressTimer);
 
   if (drawingScribble){
     if (drawingScribble.points.length>1){
@@ -1337,7 +1371,7 @@ function onCanvasUp(e){
   }
   const hadEdit = movingId || resizing || isNewRoom;
   movingId=null; dragOffset=null; resizing=null; drawingRoom=null; previewRoom=null;
-  // เปิด/รีเฟรชป๊อปอัพขนาด-แก้ไข เฉพาะตอนสร้างห้องใหม่ หรือถ้าป๊อปอัพเปิดอยู่แล้ว (มาจากแตะ 2 ครั้ง)
+  // เปิด/รีเฟรชป๊อปอัพขนาด-แก้ไข เฉพาะตอนสร้างห้องใหม่ หรือถ้าป๊อปอัพเปิดอยู่แล้ว (มาจากกดค้าง)
   // ไม่เปิดป๊อปอัพเองตอนแค่ลากย้าย หรือลากมุมขยายห้องแบบปกติ
   if (isNewRoom || sheetWasOpen) renderProps();
   renderCanvas();
